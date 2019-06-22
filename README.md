@@ -1,24 +1,37 @@
-# README
+# Railsチュートリアルのサンプルアプリケーションです
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+このアプリケーションは、以下の教材をもとに作成したサンプルアプリケーションです。
+[*Ruby on Railsチュートリアル*](https://railstutorial.jp)
 
-Things you may want to cover:
+### ■ライセンス
+[*Ruby on Railsチュートリアル*](https://railstutorial.jp)内にあるソースコードはMITライセンス(著作権表記を記しておけば自由に改造、使用することができる)と、Beerwareライセンス(開発者に出会った時にビールを奢ることができる権利)のもとで公開されています。
+詳細は[LICENSE.md](LICENSE.md)を参照してください。
 
-* Ruby version
+### ■使い方
 
-* System dependencies
+#### <u>1.Gitリポジトリをクローンする</u>
+まずは手元のローカルPCにこのリポジトリをcloneしてください。
 
-* Configuration
+#### <u>2.bundle installする</u>
+以下のコマンドを実行して、bundle installしてください。この時、ローカルPCは開発環境とするため、productionでしか使用しないgemはインストールしないように--without productionオプションを付与します。
+```bash
+$ bundle install --without production
+```
 
-* Database creation
+#### <u>3.マイグレーションを実行する</u>
+以下のコマンドでDBに対してマイグレーションを実行します。
+```bash
+$ rails db:migrate
+```
 
-* Database initialization
+#### <u>4.テストを実行する</u>
+以下のコマンドでテストを実行してください。
+```bash
+$ rails test
+```
 
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+#### <u>5.サーバを起動する</u>
+テストが問題なかった場合、以下のコマンドでRailsアプリケーションを実行してください。
+```bash
+$ rails server
+```
