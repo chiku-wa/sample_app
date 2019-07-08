@@ -16,12 +16,13 @@ jobs:
       # Docckerに搭載するイメージを指定する
 
       # [Ruby]
-      - image: circleci/ruby:2.6.2-node
+      - image: circleci/ruby:2.5.1-node
         # 環境変数の定義
         environment:
           BUNDLE_JOBS: 3
           BUNDLE_RETRY: 3
           BUNDLE_PATH: vendor/bundle
+          BUNDLER_VERSION: 2.0.1
           RAILS_ENV: test
 
     # -----steps:
@@ -29,6 +30,10 @@ jobs:
     steps:
       # ソースコードをGitHubからCircleCIの作業ディレクトリにコピーする
       - checkout
+
+      - run:
+          name: Bundlerのバージョンを出力
+          command: bundle -v
 
       # Bundleキャッシュを復元する
       - restore_cache:
@@ -38,7 +43,7 @@ jobs:
 
       - run:
           name: bundle install実行
-          command: bundle install --path vendor/bundle --clean --jobs 4 --retry 3
+          command: bundle check --path=vendor/bundle || bundle install --path vendor/bundle --clean --jobs 4 --retry 3
 
       # bundle install実行後のキャッシュを保存する(次回実行時、前述のrestore_cacheで使用する)
       - save_cache:
