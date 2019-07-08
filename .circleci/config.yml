@@ -58,15 +58,11 @@ jobs:
       - run:
           name: RSpecを並列実行(実行速度を上げるため)
           command: |
-            bundle exec rspec --profile 10 \ # 処理の遅いテストを10個サンプリングする
-                      # CircleCI用のRSPecのテスト結果出力用フォーマッター(要Gemfileへのg定義追加)
-                      # --outで出力する時に使用する
+            bundle exec rspec --profile 10 \
                       --format RspecJunitFormatter \
-                      # テスト結果の出力先
                       --out test_results/rspec.xml \
-                      # 標準出力のフォーマット設定
                       --format progress \
-                      $(circleci tests glob "spec/**/*_spec.rb" | circle tests split --split-by=timings)
+                      $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
 
       # テスト結果を保存する
       - store_test_results:
