@@ -32,8 +32,10 @@ jobs:
       - checkout
 
       - run:
-          name: Bundlerのバージョンを出力
-          command: bundle -v
+          name: Bundlerをインストールし、バージョンを出力
+          command: |
+            gem install bundler
+            bundle -v
 
       # Bundleキャッシュを復元する
       - restore_cache:
