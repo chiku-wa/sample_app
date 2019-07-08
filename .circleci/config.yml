@@ -1,0 +1,73 @@
+# 使用するCircleCIのバージョン
+version: 2
+# jobs:
+#   ジョブを指定する、1つだけの場合はジョブ名は「build」とする必要がある
+jobs:
+  # build:
+  #   ジョブ名
+  build:
+    working_directory: ~/circleci-demo-ruby-rails
+
+    # CircleCIではDockerの使用が推奨されているため、Dockerの設定を行う
+    docker:
+      # - image:
+      # Docckerに搭載するイメージを指定する
+      - image: circleci/ruby:2.6.2-node
+        # 環境変数の定義
+        environment:
+          RAILS_ENV: test
+          PGHOST: 127.0.0.1
+          PGUSER: root
+
+    # Service container image available at `host: localhost`
+
+      - image: circleci/postgres:9.6.2-alpine
+        # environment:
+        #   環境変数の定義
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: circle-test_test
+
+    # steps:
+    #   ジョブで実行する処理を順に定義する
+    steps:
+      - checkout
+
+      # - restore_cache
+      #   後述の「save_cache」で保存したkeyからファイル、ディレクトリを復元する
+      # Restore bundle cache
+      - restore_cache:
+          keys:
+            - rails-demo-{{ checksum "Gemfile.lock" }}
+            - rails-demo-
+
+      # - run
+      #   「command:」で指定したコマンドを実行する
+      #   Bundle install dependencies
+      - run:
+          name: Install dependencies
+          command: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs 4 --retry 3
+
+      - run: sudo apt install -y postgresql-client || true
+
+      # - save_cache
+      # 「paths:」で指定したディレクトリを、keyを指定して保存することができる
+      # Store bundle cache
+      - save_cache:
+          key: rails-demo-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+      - run:
+          name: Database Setup
+          command: |
+            bundle exec rake db:create
+            bundle exec rake db:structure:load
+
+      - run:
+          name: RSpec
+          command: bundle exec rspec --format documentation
+
+      # Save artifacts
+      - store_test_results:
+          path: /tmp/test-results
