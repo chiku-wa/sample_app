@@ -1,4 +1,4 @@
-version: 2.0
+version: 2
 
 # =====jobs:
 #   ジョブを指定する、複数指定可能だが、ジョブが1つだけの場合は「build」にする必要がある
@@ -57,11 +57,10 @@ jobs:
           name: RSpecを並列実行(実行速度を上げるため)
           command: |
             bundle exec rspec --profile 10 \
-                      --format RspecJunitFormatter \
-                      --out test_results/rspec.xml \
-                      --format progress \
-                      $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
-
+                              --format RspecJunitFormatter \
+                              --out test_results/rspec.xml \
+                              --format progress \
+                              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
       # テスト結果を保存する
       - store_test_results:
             path:
