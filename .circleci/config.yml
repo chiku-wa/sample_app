@@ -38,7 +38,7 @@ jobs:
 
       - run:
           name: bundle install実行
-          command: bundle check --path=vendor/bundle || bundle install --path vendor/bundle --clean --jobs 4 --retry 3
+          command: bundle install --path vendor/bundle --clean --jobs 4 --retry 3
 
       # bundle install実行後のキャッシュを保存する(次回実行時、前述のrestore_cacheで使用する)
       - save_cache:
