@@ -1,0 +1,67 @@
+version: 2
+
+# =====jobs:
+#   ジョブを指定する、複数指定可能だが、ジョブが1つだけの場合は「build」にする必要がある
+jobs:
+
+  # -----build:
+  #   ジョブ名を指定する
+  build:
+
+    # CircleCIではDockerの使用が推奨されているため、Dockerの設定を行う
+    docker:
+      # - image:
+      # Docckerに搭載するイメージを指定する
+
+      # [Ruby]
+      - image: circleci/ruby:2.6.2-node
+        # 環境変数の定義
+        environment:
+          BUNDLE_JOBS: 3
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+          BUNDLER_VERSION: 2.0.1
+          RAILS_ENV: test
+
+    # -----steps:
+    #   ジョブで実行する処理を定義する
+    steps:
+      # ソースコードをGitHubからCircleCIの作業ディレクトリにコピーする
+      - checkout
+
+      - run:
+          name: Bundlerをインストールし、バージョンを出力
+          command: |
+            gem install bundler
+            bundle -v
+
+      # Bundleキャッシュを復元する
+      - restore_cache:
+          keys:
+            - rails-demo-bundler-v2-{{ checksum "Gemfile.lock"}}
+            - rails-demo-bundle-v2-
+
+      - run:
+          name: bundle install実行
+          command: bundle check --path=vendor/bundle || bundle install --path vendor/bundle --clean --jobs 4 --retry 3
+
+      # bundle install実行後のキャッシュを保存する(次回実行時、前述のrestore_cacheで使用する)
+      - save_cache:
+            key:
+              rails-demo-bundler-v2-{{ checksum "Gemfile.lock"}}
+            paths:
+              - vendor/bundle
+
+      # RSpecを実行する
+      - run:
+          name: RSpecを並列実行(実行速度を上げるため)
+          command: |
+            bundle exec rspec --profile 10 \
+                              --format RspecJunitFormatter \
+                              --out test_results/rspec.xml \
+                              --format progress \
+                              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+      # テスト結果を保存する
+      - store_test_results:
+            path:
+              test_results
