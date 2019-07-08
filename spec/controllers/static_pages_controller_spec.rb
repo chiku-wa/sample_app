@@ -21,7 +21,7 @@ RSpec.describe StaticPagesController, type: :controller do
       action_methods.each do |action_method|
         it "アクションメソッド [#{action_method}]のテスト" do
           post action_method
-          expect(response).not_to be_success
+          expect(response).to be_success
         end
       end
     end
