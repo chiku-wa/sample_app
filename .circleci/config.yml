@@ -16,7 +16,7 @@ jobs:
       # Docckerに搭載するイメージを指定する
 
       # [Ruby]
-      - image: circleci/ruby:2.4.2-jessie-node
+      - image: circleci/ruby:2.6.2-node
         # 環境変数の定義
         environment:
           BUNDLE_JOBS: 3
