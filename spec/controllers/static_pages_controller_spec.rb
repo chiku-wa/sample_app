@@ -6,6 +6,7 @@ RSpec.describe StaticPagesController, type: :controller do
     action_methods = [
       :home,
       :help,
+      :about,
     ]
 
     context "Getメソッドのテスト" do
