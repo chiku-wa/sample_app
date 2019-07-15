@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "[StaticPagesコントローラ]", type: :request do
+RSpec.describe "StaticPagesController-requests", type: :request do
   # 期待値となるtitleタグの文字列を定義する
   let(:base_title) { " | Ruby on Rails Tutorial Sample App" }
 
@@ -10,6 +10,13 @@ RSpec.describe "[StaticPagesコントローラ]", type: :request do
     "about",
     "contact",
   ]
+
+  context "ルートディレクトリのViewレスポンスが想定どおりであること" do
+    it "HTTPレスポンス=200" do
+      get get root_url
+      expect(response).to have_http_status "200"
+    end
+  end
 
   action_methods.each do |action_method|
     context "[#{action_method}アクションのViewレスポンスが想定どおりであること]" do
@@ -28,6 +35,7 @@ RSpec.describe "[StaticPagesコントローラ]", type: :request do
       end
       it "h1タグが想定通り" do
         get "/static_pages/#{action_method}"
+
         # Homeは特定の名称を使用、Home以外はアクション名(先頭大文字)を採用
         reg_str = ""
         if action_method == "home"
