@@ -28,7 +28,8 @@ group :test do
   gem 'minitest', '5.11.3'
   gem 'minitest-reporters', '1.1.14'
   gem 'guard', '2.13.0'
-  gem 'guard-minitest', '2.4.4'
+  gem 'guard-rspec'
+  gem 'spring-commands-rspec', '~> 1.0', '>= 1.0.4'
 end
 
 group :production do
