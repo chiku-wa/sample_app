@@ -27,7 +27,7 @@ $ rails db:migrate
 #### <u>4.テストを実行する</u>
 以下のコマンドでテストを実行してください。
 ```bash
-$ rails test
+$ bundle exec rspec
 ```
 
 #### <u>5.サーバを起動する</u>
