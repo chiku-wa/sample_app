@@ -1,3 +1,6 @@
+# ======
+# 4.4.2
+# ======
 # 継承を用いず
 class Word
   # 回文ならtrue、そうでいないならfalseを返す
@@ -42,3 +45,25 @@ p wi.palindrome? #=> false
 
 wi = WordInherit.new("racecar")
 p wi.palindrome? #=> true
+
+# ======
+# 演習
+# ======
+
+# 1.
+p Range.superclass #=> Object
+p Hash.superclass #=> Object
+p Symbol.superclass #=> Object
+
+# 2.
+class WordInheritNonSelf < String
+  def palindrome?
+    self == reverse
+  end
+end
+
+wins = WordInheritNonSelf.new("tom")
+p wins.palindrome?  #=> false
+
+wins = WordInheritNonSelf.new("racecar")
+p wins.palindrome?  #=> true
