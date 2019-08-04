@@ -1,6 +1,10 @@
 @import "bootstrap-sprockets";
 @import "bootstrap";
 
+/* Set variable */
+$light-gray:#777777;
+$dark-gray:#555555;
+
 /* universal */
 body {
   padding-top: 60px;
@@ -16,11 +20,12 @@ textarea {
 
 .center {
   text-align: center;
+
+  h1 {
+    margin-bottom: 10px;
+  }
 }
 
-.center h1 {
-  margin-bottom: 10px;
-}
 
 /* typography */
 h1,
@@ -46,7 +51,7 @@ h2 {
   margin-bottom: 30px;
   text-align: center;
   font-weight: normal;
-  color: #777777
+  color: $light-gray;
 }
 
 p {
@@ -60,21 +65,22 @@ p {
   float: left;
   margin-right: 10px;
   font-size: 1.7em;
-  color: #ffffff;
+  color: white;
   // 大文字に変換する
   text-transform: uppercase;
   // 文字間隔を調整する(正の値なら感覚を広げる、負の値なら間隔を詰める)
   letter-spacing: -1px;
   padding-top: 9px;
   font-weight: bold;
+
+  // マウスオーバーしたときの挙動
+  hover {
+    color: white;
+    // 下線などの装飾を行わない(マウスオーバー時に下線が表示されないようにする)
+    text-decoration: none;
+  }
 }
 
-// マウスオーバーしたときの挙動
-#logo:hover {
-  color: #ffffff;
-  // 下線などの装飾を行わない(マウスオーバー時に下線が表示されないようにする)
-  text-decoration: none;
-}
 
 img {
   display: none;
@@ -84,29 +90,29 @@ img {
 footer {
   margin-top: 45px;
   padding-top: 5px;
-  border-top: 1px solid #eaeaea;
-  color: #777777;
-}
+  border-top: 1px solid whitesmoke;
+  color: $light-gray;
 
-footer a {
-  colore: #555555;
-}
+  a {
+    colore: $dark-gray;
+  }
 
-footer a:hover {
-  color: #222222;
-}
+  a:hover {
+    color: black;
+  }
 
-footer small {
-  float: left;
-}
+  footer small {
+    float: left;
+  }
 
-footer ul {
-  float: right;
-  // リストの「・」を表示しない(横に並べたときに見栄えを良くするため)
-  list-style: none;
-}
+  ul {
+    float: right;
+    // リストの「・」を表示しない(横に並べたときに見栄えを良くするため)
+    list-style: none;
+  }
 
-footer ul li {
-  float: left;
-  margin-left: 15px;
+  ul li {
+    float: left;
+    margin-left: 15px;
+  }
 }
