@@ -22,7 +22,7 @@ RSpec.describe "StaticPagesController-requests", type: :request do
     context "[#{action_method}アクションのViewレスポンスが想定どおりであること]" do
       # 200ステータスが返ってくること
       it "HTTPレスポンス=200" do
-        get "/static_pages/#{action_method}"
+        get "/#{action_method}"
         expect(response).to have_http_status "200"
       end
     end
