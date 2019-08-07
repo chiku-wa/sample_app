@@ -4,27 +4,30 @@ RSpec.describe "StaticPagesController-requests", type: :request do
   # 期待値となるtitleタグの文字列を定義する
   let(:base_title) { " | Ruby on Rails Tutorial Sample App" }
 
-  action_methods = [
-    "home",
-    "help",
-    "about",
-    "contact",
-  ]
-
-  context "ルートディレクトリのViewレスポンスが想定どおりであること" do
+  context "ルートディレクトリ(homeアクション)のViewレスポンスが想定どおりであること" do
     it "HTTPレスポンス=200" do
-      get get root_url
+      get root_path
       expect(response).to have_http_status "200"
     end
   end
 
-  action_methods.each do |action_method|
-    context "[#{action_method}アクションのViewレスポンスが想定どおりであること]" do
-      # 200ステータスが返ってくること
-      it "HTTPレスポンス=200" do
-        get "/#{action_method}"
-        expect(response).to have_http_status "200"
-      end
+  context "[help]アクションのViewレスポンスが想定どおりであること]" do
+    it "HTTPレスポンス=200" do
+      get help_path
+      expect(response).to have_http_status "200"
+    end
+  end
+
+  context "[about]アクションのViewレスポンスが想定どおりであること]" do
+    it "HTTPレスポンス=200" do
+      get about_path
+      expect(response).to have_http_status "200"
+    end
+  end
+  context "[contact]アクションのViewレスポンスが想定どおりであること]" do
+    it "HTTPレスポンス=200" do
+      get contact_path
+      expect(response).to have_http_status "200"
     end
   end
 end
