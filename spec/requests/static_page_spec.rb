@@ -1,9 +1,6 @@
 require "rails_helper"
 
 RSpec.describe "StaticPagesController-requests", type: :request do
-  # 期待値となるtitleタグの文字列を定義する
-  let(:base_title) { " | Ruby on Rails Tutorial Sample App" }
-
   context "ルートディレクトリ(homeアクション)のViewレスポンスが想定どおりであること" do
     it "HTTPレスポンス=200" do
       get root_path
