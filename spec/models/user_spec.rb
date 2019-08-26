@@ -1,41 +1,41 @@
 require "rails_helper"
 
-RSpec.describe User, type: :model do
+RSpec.describe "Userモデルのテスト", type: :model do
   before do
     # DBに保存するためのUserインスタンスを生成する
     @user = User.new(
       name: "Tom",
       email: "tom@example.com",
+      password: "foobar",
+      password_confirmation: "foobar",
     )
-
-    #
   end
 
-  it "should be valid" do
+  it "ユーザ情報が有効であること" do
     expect(@user).to be_valid
   end
 
-  it "name should be present" do
+  it "nameが設定されていること" do
     @user.name = ""
     expect(@user).not_to be_valid
   end
 
-  it "email should be present" do
+  it "emailが設定されていること" do
     @user.email = ""
     expect(@user).not_to be_valid
   end
 
-  it "name should not be too long" do
+  it "nameの最大文字数バリデーションが有効であること" do
     @user.name = "a" * 51
     expect(@user).not_to be_valid
   end
 
-  it "email should not be too long" do
+  it "emailの最大文字数バリデーションが有効であること" do
     @user.email = "#{("a" * 244)}@example.com"
     expect(@user).not_to be_valid
   end
 
-  it "email validation should accept valid addresses" do
+  it "emailaが有効な文字列の組み合わせであればバリデーションを通過すること" do
     valid_addresses = [
       "user@example.com",
       "USER@foo.COM",        # @より前とCOMが大文字
@@ -49,7 +49,7 @@ RSpec.describe User, type: :model do
     end
   end
 
-  it "email validation should reject invalid addresses" do
+  it "emailaが不正な文字列の組み合わせであればバリデーションエラーとなること" do
     invalid_addresses = [
       "user@example,com",   # .ではなく,
       "user_at_foo.org",    # @ではなく.
@@ -64,17 +64,27 @@ RSpec.describe User, type: :model do
     end
   end
 
-  it "email address should be uniuque" do
+  it "重複したメールアドレスはバリデーションエラーとなること" do
     duplicate_user = @user.dup
     duplicate_user.email = @user.email.upcase
     @user.save
     expect(duplicate_user).not_to be_valid
   end
 
-  it "email addresses should be saved as lower-case" do
+  it "emailが小文字に変換されて登録されること" do
     mixed_case_email = "Tom@example.com"
     @user.email = mixed_case_email
     @user.save
     expect(@user.email).to eq mixed_case_email.downcase
+  end
+
+  it "passwordに空白しか存在しない場合はバリデーションエラーとなること" do
+    @user.password = @user.password_confirmation = " " * 6
+    expect(@user).not_to be_valid
+  end
+
+  it "passwordが最小文字数を下回る場合はバリデーションエラーとなること" do
+    @user.password = @user.password_confirmation = "a" * 5
+    expect(@user).not_to be_valid
   end
 end

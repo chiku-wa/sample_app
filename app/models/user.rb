@@ -21,4 +21,12 @@ class User < ApplicationRecord
   )
 
   has_secure_password
+  VALID_PASSWORD_REGEX = //
+  validates(
+    :password,
+    {
+      presence: true,
+      length: { minimum: 6 },
+    },
+  )
 end
