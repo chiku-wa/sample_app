@@ -1,15 +1,11 @@
-<%= Time.now %>
-<table border="1">
-  <tr>
-    <th>name</th>
-    <th>email</th>
-    <th>created_at</th>
-    <th>updated_at</th>
-  </tr>
-  <tr>
-    <td><%= @user.name %></td>
-    <td><%= @user.email %></td>
-    <td><%= @user.created_at %></td>
-    <td><%= @user.updated_at %></td>
-  </tr>
-</table>
+<% provide(:title,@user.name) %>
+<div class="row">
+  <aside class="col-md-4">
+    <section class="user_info">
+      <h1>
+        <%= gravatar_for @user, {size: 200}%>
+        <%= @user.name %>
+      </h1>
+    </section>
+  </aside>
+</div>
