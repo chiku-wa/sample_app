@@ -64,7 +64,6 @@ RSpec.feature "UsersSignup", type: :feature do
       expect(page).to(have_content("Email can't be blank", count: 1))
       expect(page).to(have_content("Email is invalid", count: 1))
       expect(page).to(have_content("Password can't be blank", count: 1))
-      ˝
     end
   end
 end

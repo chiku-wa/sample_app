@@ -33,7 +33,7 @@ group :test do
   gem 'guard', '2.13.0'
   gem 'guard-rspec'
   gem 'spring-commands-rspec', '~> 1.0', '>= 1.0.4'
-  gem 'capybara', '~> 3.28'
+  gem 'capybara', '~> 3.29'
 end
 
 group :production do
