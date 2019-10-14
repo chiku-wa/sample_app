@@ -38,19 +38,17 @@ RSpec.feature "StaticPages", type: :feature do
       )
     end
 
-    # Fixme
-    # Log in機能を実装したらテストケースを修正する
     scenario "Log inリンク" do
       visit root_path
       expect(page).to(
-        have_link("Log in", href: "#", count: 1)
+        have_link("Log in", href: login_path, count: 1)
       )
 
       click_link "Log in"
       expect(page).to(
-        have_current_path(root_path)
+        have_current_path(login_path)
       )
-      # expect(page).to(have_title(full_title("XXX"),exact:true))
+      expect(page).to(have_title(full_title("Log in"), exact: true))
     end
   end
 

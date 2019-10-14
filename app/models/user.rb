@@ -29,4 +29,10 @@ class User < ApplicationRecord
       length: { minimum: 6 },
     },
   )
+
+  # 引数の文字列のハッシュを返す
+  def User.digest(string)
+    cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST : BCrypt::Eigine.cost
+    BCrypt::Password.create(string, cost: cost)
+  end
 end
