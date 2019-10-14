@@ -1,14 +1,7 @@
 require "rails_helper"
 
 RSpec.feature "Sessions", type: :feature do
-  before "正常にログインできることを確認するためのテストユーザ登録" do
-    # @user = User.new(
-    #   name: "Alice",
-    #   email: "alice@example.com",
-    #   password: "foobar",
-    #   password_confirmation: "foobar",
-    # )
-    # @user.save
+  before "テストユーザ登録" do
     @user = FactoryBot.build(:user)
     @user.save
   end
@@ -28,6 +21,15 @@ RSpec.feature "Sessions", type: :feature do
       # ヘッダのHomeリンクをクリック
       click_link("Home")
       expect(page).to_not(have_selector(".alert.alert-danger", text: "Invalid email/password combination"))
+
+      # 未ログイン時のみ表示されるボタンが表示されていること
+      expect(page).to(have_link("Log in"))
+
+      # ログイン時のみ表示するボタンが表示されていないこと
+      expect(page).not_to(have_link("Users"))
+      expect(page).not_to(have_link("Profile"))
+      expect(page).not_to(have_link("Settings"))
+      expect(page).not_to(have_link("Log out"))
     end
   end
 
@@ -41,6 +43,15 @@ RSpec.feature "Sessions", type: :feature do
       click_button("Log in")
 
       expect(page).to(have_title(full_title(@user.name)))
+
+      # ログイン時のみ表示されるボタンが表示されていること
+      expect(page).to(have_link("Users"))
+      expect(page).to(have_link("Profile"))
+      expect(page).to(have_link("Settings"))
+      expect(page).to(have_link("Log out"))
+
+      # 未ログイン時のみ表示するボタンが表示されていないこと
+      expect(page).not_to(have_link("Log in"))
     end
   end
 end
