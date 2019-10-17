@@ -45,9 +45,18 @@ RSpec.describe SessionsHelper do
 
       expect(logged_in?).to eq(true)
     end
+
+    it "ログインしていない(current_userの戻り値がnil)の場合は、falseを返すこと" do
+      expect(logged_in?).to eq(false)
+    end
   end
 
-  it "ログインしていない(current_userの戻り値がnil)の場合は、falseを返すこと" do
-    expect(logged_in?).to eq(false)
+  context "logged_inメソッド" do
+    it "セッションが破棄されること" do
+      session[:user_id] = @user.id
+      log_out
+
+      expect(session[:user_id]).to eq(nil)
+    end
   end
 end

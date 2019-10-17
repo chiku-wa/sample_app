@@ -12,9 +12,9 @@ RSpec.feature "Sessions", type: :feature do
 
       fill_in("sessions[email]", with: "invalid@foo.bar")
       fill_in("sessions[password]", with: "FooBar")
+      click_button("Log in")
 
       # ログインフォーム画面でエラーが表示されること
-      click_button("Log in")
       expect(page).to(have_selector(".alert.alert-danger", text: "Invalid email/password combination"))
 
       # ホーム画面に遷移したときはエラーが表示され【ない】こと
@@ -22,14 +22,8 @@ RSpec.feature "Sessions", type: :feature do
       click_link("Home")
       expect(page).to_not(have_selector(".alert.alert-danger", text: "Invalid email/password combination"))
 
-      # 未ログイン時のみ表示されるボタンが表示されていること
-      expect(page).to(have_link("Log in"))
-
-      # ログイン時のみ表示するボタンが表示されていないこと
-      expect(page).not_to(have_link("Users"))
-      expect(page).not_to(have_link("Profile"))
-      expect(page).not_to(have_link("Settings"))
-      expect(page).not_to(have_link("Log out"))
+      # 未ログイン時のみ表示されるボタンが表示されていること、ログイン時のみ表示するボタンが表示されていないこと
+      display_logout_menu
     end
   end
 
@@ -39,19 +33,30 @@ RSpec.feature "Sessions", type: :feature do
 
       fill_in("sessions[email]", with: @user.email)
       fill_in("sessions[password]", with: @user.password)
-
       click_button("Log in")
 
       expect(page).to(have_title(full_title(@user.name)))
 
-      # ログイン時のみ表示されるボタンが表示されていること
-      expect(page).to(have_link("Users"))
-      expect(page).to(have_link("Profile"))
-      expect(page).to(have_link("Settings"))
-      expect(page).to(have_link("Log out"))
+      display_login_menu
+    end
+  end
 
-      # 未ログイン時のみ表示するボタンが表示されていないこと
-      expect(page).not_to(have_link("Log in"))
+  feature "ログアウト" do
+    scenario "ログアウトボタン押下後はセッションが破棄されること" do
+      visit login_path
+
+      # ログインする
+      fill_in("sessions[email]", with: @user.email)
+      fill_in("sessions[password]", with: @user.password)
+      click_button("Log in")
+      display_login_menu
+
+      # ログアウトする
+      click_link("Log out")
+
+      expect(page).to(have_title(full_title))
+
+      display_logout_menu
     end
   end
 end

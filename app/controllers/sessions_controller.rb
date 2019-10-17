@@ -20,6 +20,8 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    session.delete(:user_id)
+    # ログアウトし、TOP画面に遷移する
+    log_out
+    redirect_to root_url
   end
 end
