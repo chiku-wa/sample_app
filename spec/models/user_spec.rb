@@ -104,5 +104,19 @@ RSpec.describe "Userモデルのテスト", type: :model do
       str = "FooBar"
       expect(User.digest(str)) != str
     end
+
+    it "rememberメソッドを実行すると、DBにトークンが登録されること" do
+      @user.save
+      @user.remember
+
+      user = User.find_by(id: @user.id)
+
+      # DBにremember_digestが登録されていること
+      expect(user.remember_digest).not_to eq nil
+
+      # Userインスタンスが保持するremember_tokenと、DBに登録されているremember_digest
+      # のトークン値が異なっていること(暗号化されていることの確認)
+      expect(@user.remember_token).not_to eq user.remember_digest
+    end
   end
 end
