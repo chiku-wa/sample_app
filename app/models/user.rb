@@ -32,18 +32,24 @@ class User < ApplicationRecord
   )
 
   # 引数の文字列のハッシュを返す
-  def self.digest(string)
-    cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST : BCrypt::Engine.cost
-    BCrypt::Password.create(string, cost: cost)
-  end
+  class << self
+    def digest(string)
+      cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST : BCrypt::Engine.cost
+      BCrypt::Password.create(string, cost: cost)
+    end
 
-  # ランダムなトークン(文字列)をBase64形式で返す
-  def self.new_token
-    SecureRandom.urlsafe_base64
+    # ランダムなトークン(文字列)をBase64形式で返す
+    def new_token
+      SecureRandom.urlsafe_base64
+    end
   end
 
   def remember
     self.remember_token = User.new_token
     update_attributes({ remember_digest: User.digest(self.remember_token) })
+  end
+
+  def authenticated?(remember_token)
+    BCrypt::Password.new(remember_digest).is_password?(remember_token)
   end
 end

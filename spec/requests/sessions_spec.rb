@@ -6,7 +6,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     @user.save
   end
 
-  it "有効なログイン情報をリクエストするとセッションが生成されてプロフィール画面がレンダリングされること" do
+  it "有効なログイン情報をリクエストするとセッションとCookiesが生成され、プロフィール画面がレンダリングされること" do
     get login_path
 
     # ログイン用アクションにリクエストを送る
@@ -21,7 +21,11 @@ RSpec.describe "SessionsController-requests", type: :request do
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!
     assert_template "users/show"
-    assert !!session[:user_id]
+    assert session[:user_id]
+
+    # ログイン情報がCookieに記憶されること
+    assert cookies[:user_id]
+    assert cookies[:remember_token]
   end
 
   it "無効なログイン情報をリクエストするとセッションが生成されず、ログイン画面がレンダリングされること" do

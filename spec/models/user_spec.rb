@@ -118,5 +118,21 @@ RSpec.describe "Userモデルのテスト", type: :model do
       # のトークン値が異なっていること(暗号化されていることの確認)
       expect(@user.remember_token).not_to eq user.remember_digest
     end
+
+    it "ahthenticated?メソッドで、記憶トークンが等しい場合はtrueを返すこと" do
+      @user.save
+      @user.remember
+
+      expect(@user.authenticated?(@user.remember_token)).to eq true
+    end
+
+    it "ahthenticated?メソッドで、記憶トークンが異なる場合はfalseを返すこと" do
+      @user.save
+      @user.remember
+
+      @user.remember_token = "FooBar"
+
+      expect(@user.authenticated?(@user.remember_token)).to eq false
+    end
   end
 end

@@ -12,6 +12,7 @@ class SessionsController < ApplicationController
     # そうでなければ、ログイン画面にエラーメッセージを表示して戻す。
     if user && user.authenticate(recieve_password)
       log_in(user)
+      remember(user)
       redirect_to user
     else
       flash.now[:danger] = "Invalid email/password combination"
