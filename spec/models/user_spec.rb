@@ -112,18 +112,33 @@ RSpec.describe "Userモデルのテスト", type: :model do
       user = User.find_by(id: @user.id)
 
       # DBにremember_digestが登録されていること
-      expect(user.remember_digest).not_to eq nil
+      expect(user.remember_digest).not_to be_blank
 
       # Userインスタンスが保持するremember_tokenと、DBに登録されているremember_digest
       # のトークン値が異なっていること(暗号化されていることの確認)
       expect(@user.remember_token).not_to eq user.remember_digest
     end
 
+    it "forgetメソッドを実行すると、DBに登録されたトークンがnilになること" do
+      @user.save
+      @user.remember
+
+      user = User.find_by(id: @user.id)
+
+      # DBにremember_digestが登録されていること
+      expect(user.remember_digest).not_to be_blank
+
+      # DBに登録されたremember_digestが削除されること
+      @user.forget
+      user.reload
+      expect(user.remember_digest).to be_blank
+    end
+
     it "ahthenticated?メソッドで、記憶トークンが等しい場合はtrueを返すこと" do
       @user.save
       @user.remember
 
-      expect(@user.authenticated?(@user.remember_token)).to eq true
+      expect(@user.authenticated?(@user.remember_token)).to be_truthy
     end
 
     it "ahthenticated?メソッドで、記憶トークンが異なる場合はfalseを返すこと" do
@@ -132,7 +147,7 @@ RSpec.describe "Userモデルのテスト", type: :model do
 
       @user.remember_token = "FooBar"
 
-      expect(@user.authenticated?(@user.remember_token)).to eq false
+      expect(@user.authenticated?(@user.remember_token)).to be_falsey
     end
   end
 end

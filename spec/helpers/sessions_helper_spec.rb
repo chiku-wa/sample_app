@@ -34,7 +34,7 @@ RSpec.describe SessionsHelper do
 
     it "セッションにidが格納されていない場合は、CookieからユーザIDを読み取り、ログイン処理を行うこと" do
       # 前提条件として、セッションが空であること
-      expect(session[:user_id]).to eq nil
+      expect(session[:user_id]).to be_blank
 
       # CookieにユーザIDを格納する
       remember(@user)
@@ -43,7 +43,7 @@ RSpec.describe SessionsHelper do
       expect(current_user).to eq(@user)
 
       # ログイン処理が正常に行われいていること
-      expect(session[:user_id]).not_to eq nil
+      expect(session[:user_id]).not_to be_blank
     end
   end
 
@@ -59,26 +59,42 @@ RSpec.describe SessionsHelper do
     end
   end
 
-  context "logged_inメソッド" do
-    it "セッションが破棄されること" do
+  context "log_outメソッド" do
+    it "Cookieとセッションが破棄されること" do
       session[:user_id] = @user.id
       log_out
 
       expect(session[:user_id]).to eq(nil)
+      expect(cookies[:user_id]).to eq(nil)
+      expect(cookies[:remember_token]).to eq(nil)
     end
   end
 
   context "rememberメソッド" do
-    it "remember_tokenが発行され、cookiesに値が格納されていること" do
+    it "記憶トークンがDBに登録され、CookieにユーザIDと記憶トークンが格納されていること" do
       remember(@user)
 
-      expect(@user.remember_token).not_to eq nil
+      expect(@user.remember_token).not_to be_blank
 
       # ユーザIDのCookieはsignedで暗号化しているため、取り出すときもsignedで復号化が必要
       expect(cookies.signed[:user_id]).to eq @user.id
 
       # 記憶トークンは暗号化していないため、複合化しなくとも良い
       expect(cookies[:remember_token]).to eq @user.remember_token
+    end
+  end
+
+  context "forgetメソッド" do
+    it "DBに登録された記憶トークンがnilになり、Cookieに登録されたユーザIDと記憶トークンが削除されること" do
+      # 前提条件の確認(rememberメソッドのテストケースと同じ処理)
+      remember(@user)
+      expect(@user.remember_token).not_to be_blank
+      expect(cookies[:remember_token]).to eq @user.remember_token
+
+      # DBの記憶トークンにnilが登録され、Cookieが破棄されること
+      forget(@user)
+      expect(cookies[:user_id]).to be_blank
+      expect(cookies[:remember_token]).to be_blank
     end
   end
 end

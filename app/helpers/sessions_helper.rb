@@ -14,6 +14,15 @@ module SessionsHelper
     cookies.permanent[:remember_token] = user.remember_token
   end
 
+  def forget(user)
+    # DBに登録された記憶トークン(暗号化済み)を破棄
+    user.forget
+
+    # Cookie上のユーザIDと記憶トークン(平文)を破棄
+    cookies.delete(:user_id)
+    cookies.delete(:remember_token)
+  end
+
   def current_user
     if session[:user_id]
       # セッションが存在する場合は、ログイン済みとみなしUserインスタンスを返す
@@ -34,6 +43,7 @@ module SessionsHelper
   end
 
   def log_out
+    forget(current_user)
     session.delete(:user_id)
     @current_user = nil
   end
