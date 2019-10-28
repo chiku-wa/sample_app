@@ -29,7 +29,7 @@ RSpec.describe SessionsHelper do
     it "セッションに存在しないユーザのidが格納されている場合は、nilを返すこと" do
       session[:user_id] = 99999
 
-      expect(current_user).to eq(nil)
+      expect(current_user).to be_nil
     end
 
     it "セッションにidが格納されていない場合は、CookieからユーザIDを読み取り、ログイン処理を行うこと" do
@@ -64,9 +64,9 @@ RSpec.describe SessionsHelper do
       session[:user_id] = @user.id
       log_out
 
-      expect(session[:user_id]).to eq(nil)
-      expect(cookies[:user_id]).to eq(nil)
-      expect(cookies[:remember_token]).to eq(nil)
+      expect(session[:user_id]).to be_nil
+      expect(cookies[:user_id]).to be_nil
+      expect(cookies[:remember_token]).to be_nil
     end
   end
 
