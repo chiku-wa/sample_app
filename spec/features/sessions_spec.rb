@@ -55,7 +55,6 @@ RSpec.feature "Sessions", type: :feature do
       click_link("Log out")
 
       expect(page).to(have_title(full_title))
-      p page.body
       display_logout_menu
     end
   end

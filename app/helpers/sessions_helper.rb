@@ -43,7 +43,10 @@ module SessionsHelper
   end
 
   def log_out
-    forget(current_user)
+    # current_userがnilだとエラーになるため、ログインしている場合のみforget処理を行う
+    if logged_in?
+      forget(current_user)
+    end
     session.delete(:user_id)
     @current_user = nil
   end

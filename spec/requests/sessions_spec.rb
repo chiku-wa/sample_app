@@ -46,7 +46,8 @@ RSpec.describe "SessionsController-requests", type: :request do
   end
 
   it "ログアウトするとセッションが破棄され、TOP画面に遷移すること" do
-    # ===========ログイン状態にする
+    # ==============================
+    # ===ログイン状態にする
     # ログイン用アクションにリクエストを送る
     post login_path, params: {
                        sessions: {
@@ -65,7 +66,8 @@ RSpec.describe "SessionsController-requests", type: :request do
     assert !cookies[:user_id].blank?
     assert !cookies[:remember_token].blank?
 
-    # ===========ログアウトする
+    # ==============================
+    # ===ログアウトする
     delete logout_path
 
     follow_redirect!
@@ -75,5 +77,31 @@ RSpec.describe "SessionsController-requests", type: :request do
     assert session[:user_id].blank?
     assert cookies[:user_id].blank?
     assert cookies[:remember_token].blank?
+  end
+
+  it "ログアウトを2回続けて行った時にエラーにならないこと(ログアウト処理が2重で行われないこと)" do
+    # ==============================
+    # ===ログイン状態にする
+    # ログイン用アクションにリクエストを送る
+    post login_path, params: {
+                       sessions: {
+                         name: @user,
+                         email: @user.email,
+                         password: @user.password,
+                       },
+                     }
+
+    # プロフィール画面に遷移し、ログイン済みになること
+    follow_redirect!
+    assert_template "users/show"
+    assert session[:user_id] != nil
+
+    # ==============================
+    # ===2回続けてログアウトする
+    delete logout_path
+    delete logout_path
+
+    follow_redirect!
+    assert_template "static_pages/home"
   end
 end

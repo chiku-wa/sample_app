@@ -149,5 +149,15 @@ RSpec.describe "Userモデルのテスト", type: :model do
 
       expect(@user.authenticated?(@user.remember_token)).to be_falsey
     end
+
+    it "authenticated?メソッドで、remember_digestがnilだった場合にfalseを返すこと" do
+      @user.save
+      @user.remember
+
+      @user.remember_token = "FooBar"
+      @user.remember_digest = nil
+
+      expect(@user.authenticated?(@user.remember_token)).to be_falsey
+    end
   end
 end
