@@ -82,7 +82,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     # ==============================
     # ===ログイン状態にする
     # ログイン用アクションにリクエストを送る
-    post login_path, params: { sessions: params_user(@user) }
+    post login_path, params: { sessions: params_user(@user, remember_me: true) }
 
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!
@@ -99,6 +99,8 @@ RSpec.describe "SessionsController-requests", type: :request do
 
     follow_redirect!
     assert_template "static_pages/home"
+
+    assert session[:user_id].blank?
 
     # セッションとCookieが破棄されること
     assert session[:user_id].blank?
