@@ -5,6 +5,7 @@ class SessionsController < ApplicationController
   def create
     recieve_email = params[:sessions][:email]
     recieve_password = params[:sessions][:password]
+    recieve_remember_me = params[:sessions][:remember_me]
 
     user = User.find_by_email(recieve_email.downcase)
 
@@ -12,7 +13,14 @@ class SessionsController < ApplicationController
     # そうでなければ、ログイン画面にエラーメッセージを表示して戻す。
     if user && user.authenticate(recieve_password)
       log_in(user)
-      remember(user)
+
+      # remember_meにチェックが入れられている場合のみ、記憶トークンを保存する
+      if recieve_remember_me.to_i == 1
+        remember(user)
+      else
+        forget(user)
+      end
+
       redirect_to user
     else
       flash.now[:danger] = "Invalid email/password combination"

@@ -2,11 +2,24 @@ module LoginMacros
   # ---
   # フォーム入力用メソッド
   #
+  # ユーザ登録(サインアップ)で使用するメソッド
   def input_signup_form(user)
     fill_in("user[name]", with: user.name)
     fill_in("user[email]", with: user.email)
     fill_in("user[password]", with: user.password)
     fill_in("user[password_confirmation]", with: user.password_confirmation)
+  end
+
+  # ユーザ登録(サインアップ)で使用するメソッド
+  def input_login_form(user, remember_me: false)
+    fill_in("sessions[email]", with: user.email)
+    fill_in("sessions[password]", with: user.password)
+    param_name_remember_me = "sessions[remember_me]"
+    if remember_me
+      check(param_name_remember_me)
+    else
+      uncheck(param_name_remember_me)
+    end
   end
 
   # ---

@@ -6,17 +6,11 @@ RSpec.describe "SessionsController-requests", type: :request do
     @user.save
   end
 
-  it "有効なログイン情報をリクエストするとセッションとCookiesが生成され、プロフィール画面がレンダリングされること" do
+  it "remember_meを有効にした状態でログイン情報をリクエストすると、セッションとCookiesが生成され、プロフィール画面がレンダリングされること" do
     get login_path
 
     # ログイン用アクションにリクエストを送る
-    post login_path, params: {
-                       sessions: {
-                         name: @user,
-                         email: @user.email,
-                         password: @user.password,
-                       },
-                     }
+    post login_path, params: { sessions: params_user(@user, remember_me: true) }
 
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!
@@ -28,17 +22,56 @@ RSpec.describe "SessionsController-requests", type: :request do
     assert !cookies[:remember_token].blank?
   end
 
+  it "remember_meを無効にした状態でログイン情報をリクエストすると、セッションは生成されるが、Cookiesは生成されず、プロフィール画面がレンダリングされること" do
+    get login_path
+
+    # ログイン用アクションにリクエストを送る
+    post login_path, params: { sessions: params_user(@user, remember_me: false) }
+
+    # プロフィール画面に遷移し、ログイン済みになること
+    follow_redirect!
+    assert_template "users/show"
+    assert !session[:user_id].blank?
+
+    # ログイン情報がCookieに記憶されないこと
+    assert cookies[:user_id].blank?
+    assert cookies[:remember_token].blank?
+  end
+
+  it "remember_meを有効にした状態でログインし、その後remember_meを無効にしてログインすると、Cookieは破棄され、セッションは保持されたままログインされること" do
+    get login_path
+
+    # ログイン用アクションにリクエストを送る(remember_me有効)
+    post login_path, params: { sessions: params_user(@user, remember_me: true) }
+
+    # プロフィール画面に遷移し、ログイン済みになること
+    follow_redirect!
+    assert_template "users/show"
+    assert !session[:user_id].blank?
+
+    # ログイン用アクションにリクエストを送る(remember_me無効)
+    post login_path, params: { sessions: params_user(@user, remember_me: false) }
+
+    # プロフィール画面に遷移し、ログイン済みになること
+    follow_redirect!
+    assert_template "users/show"
+    assert !session[:user_id].blank?
+
+    # Cookieが空になること
+    assert cookies[:user_id].blank?
+    assert cookies[:remember_token].blank?
+  end
+
   it "無効なログイン情報をリクエストするとセッションが生成されず、ログイン画面がレンダリングされること" do
     get login_path
 
     # ログイン用アクションにリクエストを送る
-    post login_path, params: {
-                       sessions: {
-                         name: "invalid_user",
-                         email: "invalid@example.com",
-                         password: "foobar",
-                       },
-                     }
+    user = User.new(
+      name: "invalid_user",
+      email: "invalid@example.com",
+      password: "foobar",
+    )
+    post login_path, params: { sessions: params_user(user) }
 
     # ログイン画面に遷移し、セッションが生成されないこと
     assert_template "sessions/new"
@@ -49,13 +82,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     # ==============================
     # ===ログイン状態にする
     # ログイン用アクションにリクエストを送る
-    post login_path, params: {
-                       sessions: {
-                         name: @user,
-                         email: @user.email,
-                         password: @user.password,
-                       },
-                     }
+    post login_path, params: { sessions: params_user(@user) }
 
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!
@@ -83,13 +110,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     # ==============================
     # ===ログイン状態にする
     # ログイン用アクションにリクエストを送る
-    post login_path, params: {
-                       sessions: {
-                         name: @user,
-                         email: @user.email,
-                         password: @user.password,
-                       },
-                     }
+    post login_path, params: { sessions: params_user(@user) }
 
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!
