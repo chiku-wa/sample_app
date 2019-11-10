@@ -32,7 +32,7 @@ RSpec.describe SessionsHelper do
       expect(current_user).to be_nil
     end
 
-    it "セッションにidが格納されていない場合は、CookieからユーザIDを読み取り、ログイン処理を行うこと" do
+    it "セッションにユーザIDが格納されていない場合は、CookieからユーザIDを読み取り、ログイン処理を行うこと" do
       # 前提条件として、セッションが空であること
       expect(session[:user_id]).to be_blank
 
@@ -42,8 +42,22 @@ RSpec.describe SessionsHelper do
       # セッションがない場合であっても、CookieからユーザIDを読み取り、ログイン処理を行うこと
       expect(current_user).to eq(@user)
 
-      # ログイン処理が正常に行われいていること
+      # ログイン処理が正常に行われること
       expect(session[:user_id]).not_to be_blank
+    end
+
+    it "セッションにユーザIDが格納されていない場合はCookieからユーザIDを読み取るが、CookieのユーザIDが不正な場合はログイン処理が行われないこと" do
+      # 前提条件として、セッションが空であること
+      expect(session[:user_id]).to be_blank
+
+      remember(@user)
+
+      # Cookieに不正なユーザID(DBに存在しないユーザID)を格納する
+      cookies.signed[:user_id] = "9999"
+
+      # ログイン処理が正常に行われいないこと
+      expect(current_user).to be_nil
+      expect(session[:user_id]).to be_blank
     end
   end
 

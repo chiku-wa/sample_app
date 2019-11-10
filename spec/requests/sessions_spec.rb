@@ -38,6 +38,25 @@ RSpec.describe "SessionsController-requests", type: :request do
     assert cookies[:remember_token].blank?
   end
 
+  it "remember_meに1以外の文字列をパラメータとしてリクエストすると、remember_meにチェックを入れていない場合と同じ挙動になること" do
+    get login_path
+
+    # ログイン用アクションにリクエストを送る
+    login_parameters = params_user(@user, remember_me: false)
+    # ifの判定でtrueになる値(1以外)をremember_meに設定する
+    login_parameters[:remember_me] = "invalid parameter"
+    post login_path, params: { sessions: login_parameters }
+
+    # プロフィール画面に遷移し、ログイン済みになること
+    follow_redirect!
+    assert_template "users/show"
+    assert !session[:user_id].blank?
+
+    # ログイン情報がCookieに記憶されないこと
+    assert cookies[:user_id].blank?
+    assert cookies[:remember_token].blank?
+  end
+
   it "remember_meを有効にした状態でログインし、その後remember_meを無効にしてログインすると、Cookieは破棄され、セッションは保持されたままログインされること" do
     get login_path
 
