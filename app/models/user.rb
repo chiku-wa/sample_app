@@ -44,15 +44,18 @@ class User < ApplicationRecord
     end
   end
 
+  # 記憶トークンをDBに登録する
   def remember
     self.remember_token = User.new_token
     update_attributes({ remember_digest: User.digest(self.remember_token) })
   end
 
+  # 記憶トークンをDBから削除する
   def forget
     update_attributes({ remember_digest: nil })
   end
 
+  # CookieとDBの記憶トークンが一致するかどうかを返す
   def authenticated?(remember_token)
     return false if remember_digest.nil?
     BCrypt::Password.new(remember_digest).is_password?(remember_token)

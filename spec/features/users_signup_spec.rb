@@ -11,7 +11,7 @@ RSpec.feature "UsersSignup", type: :feature do
         password: "a12345",
         password_confirmation: "a12345",
       )
-      input_signup_form(user)
+      input_user_form(user)
 
       expect {
         click_button("Create my account")
@@ -36,7 +36,7 @@ RSpec.feature "UsersSignup", type: :feature do
         password: "foo",
         password_confirmation: "bar",
       )
-      input_signup_form(user)
+      input_user_form(user)
 
       expect {
         click_button("Create my account")
@@ -66,7 +66,7 @@ RSpec.feature "UsersSignup", type: :feature do
         password: "",
         password_confirmation: "",
       )
-      input_signup_form(user)
+      input_user_form(user)
 
       expect {
         click_button("Create my account")

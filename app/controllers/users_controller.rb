@@ -14,7 +14,25 @@ class UsersController < ApplicationController
       flash[:success] = "Welcome to the Sample App!"
       redirect_to(@user)
     else
-      render("users/new")
+      render("new")
+    end
+  end
+
+  def edit
+    if logged_in?
+      @user = User.find_by(id: session[:user_id])
+    else
+      redirect_to root_path
+    end
+  end
+
+  def update
+    @user = User.find_by(id: session[:user_id])
+    if @user.update_attributes(user_params)
+      # Fixme 一時的にTOP画面に遷移させるようにしているが、後ほど修正する
+      redirect_to root_path
+    else
+      render("edit")
     end
   end
 

@@ -13,7 +13,7 @@ RSpec.describe "Users signup", type: :request do
     )
 
     expect {
-      post users_path, params: { user: params_user(user) }
+      post users_path, params: { user: params_login(user) }
     }.to change(User, :count).by(1)
 
     # プロフィール画面に遷移し、ログイン済みになること
@@ -33,7 +33,7 @@ RSpec.describe "Users signup", type: :request do
       password_confirmation: "123456",
     )
     expect {
-      post users_path, params: { user: params_user(user) }
+      post users_path, params: { user: params_login(user) }
     }.to change(User, :count).by(0)
 
     # プロフィール画面に遷移し、ログイン済みになること

@@ -10,7 +10,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     get login_path
 
     # ログイン用アクションにリクエストを送る
-    post login_path, params: { sessions: params_user(@user, remember_me: true) }
+    post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!
@@ -26,7 +26,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     get login_path
 
     # ログイン用アクションにリクエストを送る
-    post login_path, params: { sessions: params_user(@user, remember_me: false) }
+    post login_path, params: { sessions: params_login(@user, remember_me: false) }
 
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!
@@ -42,7 +42,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     get login_path
 
     # ログイン用アクションにリクエストを送る
-    login_parameters = params_user(@user, remember_me: false)
+    login_parameters = params_login(@user, remember_me: false)
     # ifの判定でtrueになる値(1以外)をremember_meに設定する
     login_parameters[:remember_me] = "invalid parameter"
     post login_path, params: { sessions: login_parameters }
@@ -61,7 +61,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     get login_path
 
     # ログイン用アクションにリクエストを送る(remember_me有効)
-    post login_path, params: { sessions: params_user(@user, remember_me: true) }
+    post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!
@@ -69,7 +69,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     assert !session[:user_id].blank?
 
     # ログイン用アクションにリクエストを送る(remember_me無効)
-    post login_path, params: { sessions: params_user(@user, remember_me: false) }
+    post login_path, params: { sessions: params_login(@user, remember_me: false) }
 
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!
@@ -90,7 +90,7 @@ RSpec.describe "SessionsController-requests", type: :request do
       email: "invalid@example.com",
       password: "foobar",
     )
-    post login_path, params: { sessions: params_user(user) }
+    post login_path, params: { sessions: params_login(user) }
 
     # ログイン画面に遷移し、セッションが生成されないこと
     assert_template "sessions/new"
@@ -101,7 +101,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     # ==============================
     # ===ログイン状態にする
     # ログイン用アクションにリクエストを送る
-    post login_path, params: { sessions: params_user(@user, remember_me: true) }
+    post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!
@@ -131,7 +131,7 @@ RSpec.describe "SessionsController-requests", type: :request do
     # ==============================
     # ===ログイン状態にする
     # ログイン用アクションにリクエストを送る
-    post login_path, params: { sessions: params_user(@user) }
+    post login_path, params: { sessions: params_login(@user) }
 
     # プロフィール画面に遷移し、ログイン済みになること
     follow_redirect!

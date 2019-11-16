@@ -3,7 +3,7 @@ module LoginMacros
   # フォーム入力用メソッド
   #
   # ユーザ登録(サインアップ)で使用するメソッド
-  def input_signup_form(user)
+  def input_user_form(user)
     fill_in("user[name]", with: user.name)
     fill_in("user[email]", with: user.email)
     fill_in("user[password]", with: user.password)
@@ -22,9 +22,23 @@ module LoginMacros
     end
   end
 
+  # ユーザ登録(サインアップ)で使用するメソッド
+  def input_login_form(user, remember_me: false)
+    fill_in("sessions[email]", with: user.email)
+    fill_in("sessions[password]", with: user.password)
+    param_name_remember_me = "sessions[remember_me]"
+    if remember_me
+      check(param_name_remember_me)
+    else
+      uncheck(param_name_remember_me)
+    end
+  end
+
   # ---
   # 期待値確認用メソッド
   #
+
+  # ログイン済みの場合に表示される要素が表示されていること
   def display_login_menu
     # ログイン時のみ表示されるボタンが表示されていること
     expect(page).to(have_link("Users"))
@@ -36,6 +50,7 @@ module LoginMacros
     expect(page).not_to(have_link("Log in"))
   end
 
+  # 未ログインの場合に表示される要素が表示されていること
   def display_logout_menu
     # 未ログイン時のみ表示されるボタンが表示されていること
     expect(page).to(have_link("Log in"))
@@ -46,4 +61,10 @@ module LoginMacros
     expect(page).not_to(have_link("Settings"))
     expect(page).not_to(have_link("Log out"))
   end
+
+  # TODO:ユーザ更新機能が完成次第実装する
+  # 想定したプロフィール画面が表示されていること
+  # def display_profile(name:)
+  #   expect(page).to(have_content)
+  # end
 end
