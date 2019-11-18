@@ -1,7 +1,9 @@
 class SessionsController < ApplicationController
+  # ログインページを表示するためのアクション
   def new
   end
 
+  # ログイン処理のアクション
   def create
     recieve_email = params[:sessions][:email]
     recieve_password = params[:sessions][:password]
@@ -28,6 +30,7 @@ class SessionsController < ApplicationController
     end
   end
 
+  # ログアウト処理のアクション
   def destroy
     # ログアウトし、TOP画面に遷移する
     log_out

@@ -11,49 +11,33 @@ RSpec.describe "UsersController-requests", type: :request do
     @user.save
   end
 
-  context "アクションのViewレスポンスが想定どおりであること" do
-    it "newアクション：HTTPレスポンス=200" do
-      get new_user_path
+  context "ログイン済みの場合にのみ、アクセスを許可されたページのテスト" do
+    it "未ログインの場合にユーザ情報を参照しようとした場合はログインページに遷移すること" do
+      get user_path(@user)
+      follow_redirect!
+
       expect(response).to(have_http_status("200"))
-      assert_template "users/new"
+      assert_template "sessions/new"
     end
 
-    it "showアクション：HTTPレスポンス=200" do
-      get user_path(@user.id)
-      expect(response).to(have_http_status("200"))
-      assert_template "users/show"
-    end
-
-    it "editアクション：HTTPレスポンス=200" do
-      # ログインする
-      post login_path, params: { sessions: params_login(@user, remember_me: true) }
-
-      get edit_user_path(@user.id)
-      expect(response).to(have_http_status("200"))
-      assert_template "users/edit"
-    end
-
-    pending "destroyアクション：HTTPレスポンス=200" do
-      delete user_path(@user.id)
-      expect(response).to(have_http_status("200"))
-    end
-
-    it "signupアクション：HTTPレスポンス=200" do
-      get signup_path
-      expect(response).to(have_http_status("200"))
-      assert_template "users/new"
-    end
-  end
-
-  context "ユーザ更新機能に関するテスト" do
-    it "ログインしていない場合はTOP画面に遷移すること" do
+    it "ユーザ編集画面を表示しようした場合はログインページに遷移すること" do
       get edit_user_path(@user)
       follow_redirect!
 
       expect(response).to(have_http_status("200"))
-      assert_template "static_pages/home"
+      assert_template "sessions/new"
     end
 
+    it "ユーザを更新しようとした場合はログインページに遷移すること" do
+      patch user_path(@user), params: { user: params_update(@user) }
+      follow_redirect!
+
+      expect(response).to(have_http_status("200"))
+      assert_template "sessions/new"
+    end
+  end
+
+  context "ユーザ更新機能に関するテスト" do
     it "ユーザが正常に更新されること" do
       # ログインする
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
@@ -85,9 +69,9 @@ RSpec.describe "UsersController-requests", type: :request do
       # パスワードは、更新前の値と一致していないことを確認する
       expect(user.password).not_to eq before_password
 
-      # 更新に成功した場合はTOP画面に遷移すること
+      # 更新に成功した場合はプロフィール画面に遷移すること
       follow_redirect!
-      assert_template "static_pages/home"
+      assert_template "users/show"
     end
 
     it "ユーザが正常に更新されること" do
@@ -115,7 +99,7 @@ RSpec.describe "UsersController-requests", type: :request do
       expect(user.email).to eq @user.email
       expect(user.password_digest).to eq @user.password_digest
 
-      # 更新に成功した場合はTOP画面に遷移すること
+      # 更新に失敗した場合はTOP画面に遷移すること
       assert_template "users/edit"
     end
   end

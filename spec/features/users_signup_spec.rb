@@ -19,7 +19,7 @@ RSpec.feature "UsersSignup", type: :feature do
 
       # プロフィール画面に遷移し、ログイン成功のメッセージが表示されること
       expect(page).to have_title(full_title(user.name))
-      expect(page).to(have_selector(".alert.alert-success", text: /.+/))
+      expect(page).to(have_selector(".alert.alert-success", text: "Welcome to the Sample App!"))
 
       # ログイン時のみ表示されるボタンが表示されていること
       display_login_menu

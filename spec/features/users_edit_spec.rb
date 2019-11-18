@@ -27,7 +27,7 @@ RSpec.feature "UsersEdit", type: :feature do
       click_link("Settings")
 
       # ユーザ情報を入力する
-      modify_name = @user.name + "_modify"
+      modify_name = @user.name.chars.shuffle.join
       modify_email = "modify_" + @user.email
       modify_password = "modified_password"
       user = User.new(
@@ -38,10 +38,10 @@ RSpec.feature "UsersEdit", type: :feature do
       )
       input_user_form(user)
 
-      # ユーザが正常に更新され、TOP画面に遷移すること
+      # ユーザが正常に更新され、プロフィール画面に遷移し、更新された値が表示されること
       expect {
         click_button("Save changes")
-        expect(page).to(have_title(full_title))
+        succeed_update(user_name: modify_name)
       }.to change(User, :count).by(0)
     end
 
@@ -53,7 +53,7 @@ RSpec.feature "UsersEdit", type: :feature do
       click_link("Settings")
 
       # ユーザ情報を入力する
-      modify_name = @user.name + "_modify"
+      modify_name = @user.name.chars.shuffle.join
       modify_email = "modify_" + @user.email
       user = User.new(
         name: modify_name,
@@ -64,7 +64,7 @@ RSpec.feature "UsersEdit", type: :feature do
       # ユーザが正常に更新され、TOP画面に遷移すること
       expect {
         click_button("Save changes")
-        expect(page).to(have_title(full_title))
+        succeed_update(user_name: modify_name)
       }.to change(User, :count).by(0)
     end
 
@@ -114,5 +114,17 @@ RSpec.feature "UsersEdit", type: :feature do
     input_login_form(user, remember_me: true)
     click_button("Log in")
     expect(page).to(have_title(full_title(@user.name)))
+  end
+
+  # ユーザ情報の更新が成功したかを検証するためのメソッド
+  def succeed_update(user_name:)
+    # タイトルが想定どおりであること
+    expect(page).to(have_title(full_title(user_name), exact: true))
+
+    # プロフィール画面に表示される名前が想定どおりであること
+    expect(page).to(have_content(user_name))
+
+    # 更新成功のメッセージが表示されること
+    expect(page).to(have_selector(".alert.alert-success", text: "Profile updated"))
   end
 end
