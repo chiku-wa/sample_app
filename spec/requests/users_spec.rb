@@ -2,16 +2,14 @@ require "rails_helper"
 
 RSpec.describe "UsersController-requests", type: :request do
   before "edit,showなどの既存ユーザが必要なアクションをテストするためにユーザ登録を行う" do
-    @user = User.new(
-      name: "Tom",
-      email: "tom@example.com",
-      password: "foobar",
-      password_confirmation: "foobar",
-    )
+    @user = FactoryBot.build(:user)
     @user.save
+
+    @user_second = FactoryBot.build(:user_second)
+    @user_second.save
   end
 
-  context "ログイン済みの場合にのみ、アクセスを許可されたページのテスト" do
+  context "ログイン済みの場合のみアクセスが許可されたページのテスト" do
     it "未ログインの場合にユーザ情報を参照しようとした場合はログインページに遷移すること" do
       get user_path(@user)
       follow_redirect!
@@ -74,7 +72,7 @@ RSpec.describe "UsersController-requests", type: :request do
       assert_template "users/show"
     end
 
-    it "ユーザが正常に更新されること" do
+    it "不正な値の場合はユーザが更新されないこと" do
       # ログインする
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
@@ -99,8 +97,32 @@ RSpec.describe "UsersController-requests", type: :request do
       expect(user.email).to eq @user.email
       expect(user.password_digest).to eq @user.password_digest
 
-      # 更新に失敗した場合はTOP画面に遷移すること
+      # 更新に失敗した場合は編集画面に遷移すること
       assert_template "users/edit"
+    end
+
+    it "別のユーザで編集画面に遷移しようとした場合はTOP画面に遷移すること" do
+      # ユーザ1でログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # ユーザ2の更新画面に遷移するとTOP画面に遷移すること
+      get edit_user_path(@user_second)
+
+      follow_redirect!
+      expect(response).to(have_http_status("200"))
+      assert_template "static_pages/home"
+    end
+
+    it "別のユーザ情報を更新しようとした場合はTOP画面に遷移すること" do
+      # ユーザ1でログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # ユーザ2の更新画面に遷移するとTOP画面に遷移すること
+      patch user_path(@user_second), params: { user: params_update(@user) }
+
+      follow_redirect!
+      expect(response).to(have_http_status("200"))
+      assert_template "static_pages/home"
     end
   end
 end

@@ -4,6 +4,9 @@ RSpec.feature "UsersEdit", type: :feature do
   before "テストユーザ登録" do
     @user = FactoryBot.build(:user)
     @user.save
+
+    @user_second = FactoryBot.build(:user_second)
+    @user_second.save
   end
 
   feature "ユーザ情報を更新する" do
@@ -97,6 +100,16 @@ RSpec.feature "UsersEdit", type: :feature do
       # 入力項目のエラーが出力されていること
       expect(page).to(have_content("Email is invalid", count: 1))
       expect(page).to(have_content("Name is too long", count: 1))
+    end
+  end
+
+  feature "別ユーザでのアクセスが禁止されているページにアクセスしようとする" do
+    scenario "別ユーザの編集画面に遷移しようとするとTOP画面に遷移すること" do
+      login_operation
+
+      visit edit_user_path(@user_second)
+
+      expect(page).to(have_title(full_title))
     end
   end
 

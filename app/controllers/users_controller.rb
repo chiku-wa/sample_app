@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
   before_action :logged_in_user, only: [:show, :edit, :update]
+  before_action :correct_user, only: [:edit, :update]
 
   # ユーザプロフィール画面を表示するアクション
   def show
@@ -55,6 +56,14 @@ class UsersController < ApplicationController
     unless logged_in?
       flash[:danger] = "Please log in."
       redirect_to(login_path)
+    end
+  end
+
+  # ログインユーザと異なるユーザに対するリクエストだった場合はTOP画面に遷移させるメソッド
+  def correct_user
+    @user = User.find(params[:id])
+    unless current_user == @user
+      redirect_to(root_path)
     end
   end
 end
