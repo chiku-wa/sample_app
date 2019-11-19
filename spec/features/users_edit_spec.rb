@@ -41,11 +41,11 @@ RSpec.feature "UsersEdit", type: :feature do
       )
       input_user_form(user)
 
-      # ユーザが正常に更新され、プロフィール画面に遷移し、更新された値が表示されること
       expect {
         click_button("Save changes")
-        succeed_update(user_name: modify_name)
       }.to change(User, :count).by(0)
+
+      succeed_update(user_name: modify_name)
     end
 
     scenario "パスワードを入力していなくとも更新に成功すること" do
@@ -64,11 +64,11 @@ RSpec.feature "UsersEdit", type: :feature do
       )
       input_user_form(user)
 
-      # ユーザが正常に更新され、TOP画面に遷移すること
       expect {
         click_button("Save changes")
-        succeed_update(user_name: modify_name)
       }.to change(User, :count).by(0)
+
+      succeed_update(user_name: modify_name)
     end
 
     scenario "名前とメールに異常値を入力するとエラーになること" do
