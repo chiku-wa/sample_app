@@ -30,7 +30,7 @@ RSpec.feature "UsersEdit", type: :feature do
       click_link("Settings")
 
       # ユーザ情報を入力する
-      modify_name = @user.name.chars.shuffle.join
+      modify_name = shuffle_name(@user.name)
       modify_email = "modify_" + @user.email
       modify_password = "modified_password"
       user = User.new(
@@ -116,6 +116,17 @@ RSpec.feature "UsersEdit", type: :feature do
   # ======================================
   #
   private
+
+  # 引数の名前をシャッフルして返すメソッド
+  # 半角スペースで区切られている場合は姓名とみなし、姓と名ごとにシャッフルする
+  def shuffle_name(name)
+    separator = " "
+
+    name
+      .split(separator)
+      .map { |c| c.chars.shuffle.join }
+      .join(separator)
+  end
 
   # ユーザ情報の更新が成功したかを検証するためのメソッド
   def succeed_update(user_name:)
