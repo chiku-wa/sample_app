@@ -11,7 +11,7 @@ RSpec.feature "UsersEdit", type: :feature do
 
   feature "ユーザ情報を更新する" do
     scenario "ログイン中のユーザの情報がフォームの既定値として設定されること" do
-      login_operation
+      login_operation(@user)
 
       # ユーザ更新画面に遷移する
       click_link("Account")
@@ -23,7 +23,7 @@ RSpec.feature "UsersEdit", type: :feature do
     end
 
     scenario "正常なユーザ情報を入力して更新する" do
-      login_operation
+      login_operation(@user)
 
       # ユーザ更新画面に遷移する
       click_link("Account")
@@ -49,7 +49,7 @@ RSpec.feature "UsersEdit", type: :feature do
     end
 
     scenario "パスワードを入力していなくとも更新に成功すること" do
-      login_operation
+      login_operation(@user)
 
       # ユーザ更新画面に遷移する
       click_link("Account")
@@ -72,7 +72,7 @@ RSpec.feature "UsersEdit", type: :feature do
     end
 
     scenario "名前とメールに異常値を入力するとエラーになること" do
-      login_operation
+      login_operation(@user)
 
       # ユーザ更新画面に遷移する
       click_link("Account")
@@ -105,7 +105,7 @@ RSpec.feature "UsersEdit", type: :feature do
 
   feature "別ユーザでのアクセスが禁止されているページにアクセスしようとする" do
     scenario "別ユーザの編集画面に遷移しようとするとTOP画面に遷移すること" do
-      login_operation
+      login_operation(@user)
 
       visit edit_user_path(@user_second)
 
@@ -116,18 +116,6 @@ RSpec.feature "UsersEdit", type: :feature do
   # ======================================
   #
   private
-
-  # ログイン操作を行うメソッド
-  def login_operation
-    visit login_path
-    user = User.new(
-      email: @user.email,
-      password: @user.password,
-    )
-    input_login_form(user, remember_me: true)
-    click_button("Log in")
-    expect(page).to(have_title(full_title(@user.name)))
-  end
 
   # ユーザ情報の更新が成功したかを検証するためのメソッド
   def succeed_update(user_name:)

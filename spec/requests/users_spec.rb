@@ -9,24 +9,45 @@ RSpec.describe "UsersController-requests", type: :request do
     @user_second.save
   end
 
-  context "ログイン済みの場合のみアクセスが許可されたページのテスト" do
-    it "未ログインの場合にユーザ情報を参照しようとした場合はログインページに遷移すること" do
+  # ================================
+  # Controllerを交えたテスト
+  #
+  context "未ログインユーザのアクセスが許可されていないページのテスト" do
+    it "未ログインの場合にユーザ情報を参照しようとした場合はログインページに遷移し、ログイン後はユーザ参照画面に遷移すること" do
       get user_path(@user)
       follow_redirect!
 
+      # ログインページに遷移すること
       expect(response).to(have_http_status("200"))
       assert_template "sessions/new"
+
+      # ログインするとユーザ参照画面に遷移すること
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+      follow_redirect!
+      assert_template "users/show"
+
+      # 記憶されたURLがリセットされていること
+      expect(session[:forwarding_url]).to be_blank
     end
 
-    it "ユーザ編集画面を表示しようした場合はログインページに遷移すること" do
+    it "ユーザ編集画面を表示しようした場合はログインページに遷移し、ログイン後はユーザ編集画面に遷移すること" do
       get edit_user_path(@user)
       follow_redirect!
 
+      # ログインページに遷移すること遷移すること
       expect(response).to(have_http_status("200"))
       assert_template "sessions/new"
+
+      # ログインするとユーザ編集画面に遷移すること
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+      follow_redirect!
+      assert_template "users/edit"
+
+      # 記憶されたURLがリセットされていること
+      expect(session[:forwarding_url]).to be_blank
     end
 
-    it "ユーザを更新しようとした場合はログインページに遷移すること" do
+    it "ユーザを直接更新しようとした場合はログインページに遷移すること" do
       patch user_path(@user), params: { user: params_update(@user) }
       follow_redirect!
 

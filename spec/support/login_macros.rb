@@ -1,8 +1,8 @@
 module LoginMacros
   # ---
-  # フォーム入力用メソッド
+  # 所定の操作を行うメソッド(必要においじて期待値の確認も行う)
   #
-  # ユーザ登録(サインアップ)で使用するメソッド
+  # ユーザ登録(サインアップ)フォームの入力を行うメソッド
   def input_user_form(user)
     fill_in("user[name]", with: user.name)
     fill_in("user[email]", with: user.email)
@@ -10,7 +10,7 @@ module LoginMacros
     fill_in("user[password_confirmation]", with: user.password_confirmation)
   end
 
-  # ユーザ登録(サインアップ)で使用するメソッド
+  # ユーザ登録(サインアップ)フォームの入力を行うメソッド
   def input_login_form(user, remember_me: false)
     fill_in("sessions[email]", with: user.email)
     fill_in("sessions[password]", with: user.password)
@@ -22,16 +22,15 @@ module LoginMacros
     end
   end
 
-  # ユーザ登録(サインアップ)で使用するメソッド
-  def input_login_form(user, remember_me: false)
-    fill_in("sessions[email]", with: user.email)
-    fill_in("sessions[password]", with: user.password)
-    param_name_remember_me = "sessions[remember_me]"
-    if remember_me
-      check(param_name_remember_me)
-    else
-      uncheck(param_name_remember_me)
-    end
+  # ログイン操作を行うメソッド
+  def login_operation(user)
+    visit login_path
+    user = User.new(
+      email: user.email,
+      password: user.password,
+    )
+    input_login_form(user, remember_me: true)
+    click_button("Log in")
   end
 
   # ---
