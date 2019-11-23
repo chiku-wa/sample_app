@@ -111,11 +111,4 @@ RSpec.describe SessionsHelper do
       expect(cookies[:remember_token]).to be_blank
     end
   end
-
-  context "store_locationメソッド" do
-    it "GETメソッドでアクセスしたURLのみセッションに記憶されること" do
-      store_location
-      expect(session[:forwarding_url]).to be_blank
-    end
-  end
 end
