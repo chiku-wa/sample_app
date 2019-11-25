@@ -12,6 +12,7 @@ gem 'turbolinks', '5.0.1'
 gem 'jbuilder', '2.7.0'
 gem 'rspec_junit_formatter'
 gem 'nokogiri', "~>1.10.0"
+gem 'faker', '~>2.7.0'
 
 group :development, :test do
   gem 'sqlite3','1.3.13'
