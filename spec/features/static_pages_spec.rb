@@ -1,6 +1,11 @@
 require "rails_helper"
 
 RSpec.feature "StaticPages", type: :feature do
+  before "テストユーザ登録" do
+    @user = FactoryBot.build(:user)
+    @user.save
+  end
+
   # ---------------
   # Headerに関するテスト
   # ---------------
@@ -23,7 +28,7 @@ RSpec.feature "StaticPages", type: :feature do
       )
     end
 
-    scenario "Helpリンクが正常に機能すること" do
+    scenario "[未ログイン状態]Helpリンクが正常に機能すること" do
       visit root_path
       expect(page).to(
         have_link("Help", href: help_path, count: 1)
@@ -38,7 +43,7 @@ RSpec.feature "StaticPages", type: :feature do
       )
     end
 
-    scenario "Log inリンク" do
+    scenario "[未ログイン状態]Log inリンクが正常に機能すること" do
       visit root_path
       expect(page).to(
         have_link("Log in", href: login_path, count: 1)
@@ -50,7 +55,48 @@ RSpec.feature "StaticPages", type: :feature do
       )
       expect(page).to(have_title(full_title("Log in"), exact: true))
     end
+
+    scenario "[ログイン状態]Usersリンクが正常に機能すること" do
+      visit root_path
+
+      # ログインが正常に完了すること
+      login_operation(@user)
+      display_login_menu
+
+      # ユーザ一覧画面に遷移すること
+      click_link("Account")
+      click_link("Users")
+      expect(page).to(have_title("All users"))
+    end
   end
+
+  scenario "[ログイン状態]Profileリンクが正常に機能すること" do
+    visit root_path
+
+    # ログインが正常に完了すること
+    login_operation(@user)
+    display_login_menu
+
+    # ユーザ一覧画面に遷移すること
+    click_link("Account")
+    click_link("Profile")
+    expect(page).to(have_title(@user.name))
+  end
+
+  scenario "[ログイン状態]Settingsリンクが正常に機能すること" do
+    visit root_path
+
+    # ログインが正常に完了すること
+    login_operation(@user)
+    display_login_menu
+
+    # ユーザ一覧画面に遷移すること
+    click_link("Account")
+    click_link("Settings")
+    expect(page).to(have_title("Edit user"))
+  end
+
+  # ログアウトのテストはfeatures/sessions_spec.rbにて実施
 
   # ---------------
   # yieldに関するテスト

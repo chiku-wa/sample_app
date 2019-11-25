@@ -13,6 +13,23 @@ RSpec.describe "UsersController-requests", type: :request do
   # Controllerを交えたテスト
   #
   context "未ログインユーザのアクセスが許可されていないページのテスト" do
+    it "未ログインの場合にユーザ一覧を参照しようとした場合はログインページに遷移し、ログイン後はユーザ一覧画面に遷移すること" do
+      get users_path
+      follow_redirect!
+
+      # ログインページに遷移すること
+      expect(response).to(have_http_status("200"))
+      assert_template "sessions/new"
+
+      # ログインするとユーザ参照画面に遷移すること
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+      follow_redirect!
+      assert_template "users/index"
+
+      # 記憶されたURLがリセットされていること
+      expect(session[:forwarding_url]).to be_blank
+    end
+
     it "未ログインの場合にユーザ情報を参照しようとした場合はログインページに遷移し、ログイン後はユーザ参照画面に遷移すること" do
       get user_path(@user)
       follow_redirect!

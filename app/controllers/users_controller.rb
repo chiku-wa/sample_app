@@ -1,6 +1,11 @@
 class UsersController < ApplicationController
-  before_action :logged_in_user, only: [:show, :edit, :update]
+  before_action :logged_in_user, only: [:index, :show, :edit, :update]
   before_action :correct_user, only: [:edit, :update]
+
+  # ユーザ一覧を表示するアクション
+  def index
+    @users = User.all
+  end
 
   # ユーザプロフィール画面を表示するアクション
   def show

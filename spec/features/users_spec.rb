@@ -7,6 +7,15 @@ RSpec.feature "Users", type: :feature do
   end
 
   feature "未ログインユーザが保護された画面にアクセスされた場合のテスト" do
+    scenario "ユーザ一覧画面にアクセスするとログイン画面に遷移し、ログインするとユーザ一覧画面に遷移すること" do
+      visit users_path
+      redirected_login_page
+
+      # ログインするとユーザ参照画面に遷移すること
+      login_operation(@user)
+      expect(page).to(have_title(full_title("All users")))
+    end
+
     scenario "ユーザ参照画面にアクセスするとログイン画面に遷移し、ログインするとユーザ参照画面に遷移すること" do
       visit user_path(@user)
       redirected_login_page
