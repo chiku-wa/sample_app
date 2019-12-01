@@ -103,10 +103,12 @@ RSpec.feature "UsersEdit", type: :feature do
     end
   end
 
-  feature "別ユーザでのアクセスが禁止されているページにアクセスしようとする" do
-    scenario "別ユーザの編集画面に遷移しようとするとTOP画面に遷移すること" do
+  feature "他のユーザからのアクセスが禁止されているページにアクセスしようとしたときのテスト" do
+    scenario "他のユーザの編集画面に遷移しようとするとTOP画面に遷移すること" do
+      # 自身のアカウントでログインする
       login_operation(@user)
 
+      # 他のユーザの編集画面に遷移しようとする
       visit edit_user_path(@user_second)
 
       expect(page).to(have_title(full_title))
@@ -114,7 +116,6 @@ RSpec.feature "UsersEdit", type: :feature do
   end
 
   # ======================================
-  #
   private
 
   # 引数の名前をシャッフルして返すメソッド

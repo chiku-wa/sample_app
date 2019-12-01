@@ -4,7 +4,7 @@ class UsersController < ApplicationController
 
   # ユーザ一覧を表示するアクション
   def index
-    @users = User.all
+    @users = User.paginate(page: params[:page])
   end
 
   # ユーザプロフィール画面を表示するアクション
@@ -49,6 +49,7 @@ class UsersController < ApplicationController
     end
   end
 
+  # ======================================
   private
 
   # パラメータとしてリクエストされたユーザ情報を適切な形式にして返すメソッド

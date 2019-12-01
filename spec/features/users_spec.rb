@@ -11,7 +11,7 @@ RSpec.feature "Users", type: :feature do
       visit users_path
       redirected_login_page
 
-      # ログインするとユーザ参照画面に遷移すること
+      # ログインするとユーザ一覧画面に遷移すること
       login_operation(@user)
       expect(page).to(have_title(full_title("All users")))
     end
@@ -29,14 +29,39 @@ RSpec.feature "Users", type: :feature do
       visit edit_user_path(@user)
       redirected_login_page
 
-      # ログインするとユーザ参照画面に遷移すること
+      # ログインするとユーザ編集画面に遷移すること
       login_operation(@user)
       expect(page).to(have_title(full_title("Edit user")))
     end
   end
 
+  feature "ログイン後に遷移する画面がログイン不要なページだった場合、想定通り画面遷移するか確認するテスト" do
+    scenario "TOP画面に遷移した後にログインした場合は、ユーザプロフィール画面に遷移すること" do
+      visit root_path
+
+      login_operation(@user)
+
+      expect(page).to(have_title(full_title(@user.name)))
+    end
+
+    scenario "Help画面に遷移した後にログインした場合は、ユーザプロフィール画面に遷移すること" do
+      visit help_path
+
+      login_operation(@user)
+
+      expect(page).to(have_title(full_title(@user.name)))
+    end
+
+    scenario "Sign up(ユーザ登録)画面に遷移した後にログインした場合は、ユーザプロフィール画面に遷移すること" do
+      visit signup_path
+
+      login_operation(@user)
+
+      expect(page).to(have_title(full_title(@user.name)))
+    end
+  end
+
   # ======================================
-  #
   private
 
   # ログイン画面に強制的に遷移させられたことを確認するためのメソッド

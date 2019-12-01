@@ -13,6 +13,9 @@ gem 'jbuilder', '2.7.0'
 gem 'rspec_junit_formatter'
 gem 'nokogiri', "~>1.10.0"
 gem 'faker', '~>2.7.0'
+gem 'will_paginate', '~> 3.0'
+gem 'bootstrap-will_paginate', '~> 1.0'
+gem 'activerecord-import', '~> 1.0'
 
 group :development, :test do
   gem 'sqlite3','1.3.13'
