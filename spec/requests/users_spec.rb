@@ -7,11 +7,10 @@ RSpec.describe "UsersController-requests", type: :request do
 
     @user_second = FactoryBot.build(:user_second)
     @user_second.save
+
+    generate_test_users(100)
   end
 
-  # ================================
-  # Controllerを交えたテスト
-  #
   context "未ログインユーザのアクセスが許可されていないページのテスト" do
     it "未ログインの場合にユーザ一覧を参照しようとした場合はログインページに遷移し、ログイン後はユーザ一覧画面に遷移すること" do
       get users_path
@@ -70,6 +69,29 @@ RSpec.describe "UsersController-requests", type: :request do
 
       expect(response).to(have_http_status("200"))
       assert_template "sessions/new"
+    end
+  end
+
+  context "ユーザ一覧機能に関するテスト" do
+    it "直接アクセス、Next、Previousが正常に機能すること" do
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      expect_number_of = 30
+
+      # ページ指定無しの場合でも正常に表示されること
+      get users_path, params: { page: nil }
+      assert_template "users/index"
+      expect(assigns[:users].size).to eq expect_number_of
+
+      # 次のページに移動しても想定通りの値が表示されること
+      get users_path, params: { page: 2 }
+      assert_template "users/index"
+      expect(assigns[:users].size).to eq expect_number_of
+
+      # 前のページに移動しても想定通りの値が表示されること
+      get users_path, params: { page: 1 }
+      assert_template "users/index"
+      expect(assigns[:users].size).to eq expect_number_of
     end
   end
 

@@ -9,16 +9,7 @@ RSpec.feature "UsersIndex", type: :feature do
     @user_second = FactoryBot.build(:user_second)
     @user_second.save
 
-    # ページネーションに必要な、必要十分のユーザを登録する
-    test_users = []
-    99.times do |i|
-      test_users << User.new(
-        name: Faker::Name.name,
-        email: "example-#{i}@railstutorial.org",
-        password: "foobar",
-      )
-    end
-    User.import(test_users)
+    generate_test_users(100)
   end
 
   feature "ユーザ一覧に関するテスト" do
