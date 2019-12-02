@@ -56,7 +56,7 @@ RSpec.feature "UsersEdit", type: :feature do
       click_link("Settings")
 
       # ユーザ情報を入力する
-      modify_name = @user.name.chars.shuffle.join
+      modify_name = shuffle_name(@user.name)
       modify_email = "modify_" + @user.email
       user = User.new(
         name: modify_name,

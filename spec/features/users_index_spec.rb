@@ -19,7 +19,6 @@ RSpec.feature "UsersIndex", type: :feature do
       login_operation(@user)
       click_link("Account")
       click_link("Users")
-      puts page.body
 
       # ユーザ一覧で使用されているulの配下のliの数が想定どおりであること
       number_of_users = 30
