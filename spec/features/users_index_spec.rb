@@ -13,8 +13,17 @@ RSpec.feature "UsersIndex", type: :feature do
   end
 
   feature "ユーザ一覧に関するテスト" do
-    scenario "一度に表示されるユーザが30件であること" do
+    scenario "ページネーションバーが2つ存在すること" do
+      login_operation(@user)
+      click_link("Account")
+      click_link("Users")
 
+      expect(page).to(have_link("Next →", count: 2))
+      expect(page).to(have_link("← Previous", count: 2))
+      # expect(html).to(have_css("link[rel='next']", visible: false))
+    end
+
+    scenario "一度に表示されるユーザが30件であること" do
       # ログインし、ユーザ一覧画面に遷移する
       login_operation(@user)
       click_link("Account")
