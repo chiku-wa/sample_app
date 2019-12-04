@@ -184,5 +184,23 @@ RSpec.describe "UsersController-requests", type: :request do
       expect(response).to(have_http_status("200"))
       assert_template "static_pages/home"
     end
+
+    it "PATCHリクエストでadmin属性を更新しようとしても更新されないこと" do
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # adminパラメータを追加してPATCHリクエストを送信する
+      invalid_parameter = params_update(@user)
+      invalid_parameter[:admin] = true
+      patch user_path(@user), params: { user: invalid_parameter }
+
+      # 管理者権限が付与されていないこと
+      @user.reload
+      expect(@user.admin).to be_falsey
+
+      # エラーにはならず、通常の更新と同じ様にユーザ情報画面に遷移すること
+      follow_redirect!
+      expect(response).to(have_http_status("200"))
+      assert_template "users/show"
+    end
   end
 end
