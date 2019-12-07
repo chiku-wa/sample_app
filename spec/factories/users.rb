@@ -12,4 +12,12 @@ FactoryBot.define do
     email { "yamada.tarou@example.com" }
     password { "123456" }
   end
+
+  # 管理者ユーザ
+  factory :user_admin, class: User do
+    name { "Admin Tarou" }
+    email { "admin.tarou@example.com" }
+    password { "123456" }
+    admin { true }
+  end
 end

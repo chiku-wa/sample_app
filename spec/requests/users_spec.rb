@@ -1,12 +1,15 @@
 require "rails_helper"
 
 RSpec.describe "UsersController-requests", type: :request do
-  before "edit,showなどの既存ユーザが必要なアクションをテストするためにユーザ登録を行う" do
+  before "テストユーザ登録" do
     @user = FactoryBot.build(:user)
     @user.save
 
     @user_second = FactoryBot.build(:user_second)
     @user_second.save
+
+    @user_admin = FactoryBot.build(:user_admin)
+    @user_admin.save
 
     generate_test_users(100)
   end
@@ -202,5 +205,34 @@ RSpec.describe "UsersController-requests", type: :request do
       expect(response).to(have_http_status("200"))
       assert_template "users/show"
     end
+  end
+
+  context "ユーザ削除機能に関するテスト" do
+    it "正常にユーザが削除できること" do
+      # 管理者ユーザでログインする
+      post login_path, params: { sessions: params_login(@user_admin) }
+
+      # ユーザが削除できること
+      user = User.find_by(admin: false)
+      expect {
+        delete user_path(user)
+      }.to change(User, :count).by(-1)
+
+      expect(User.find_by(id: user.id)).to be_nil
+    end
+  end
+
+  it "管理者以外がユーザを削除できないこと" do
+    # 管理者以外のユーザでログインする
+    post login_path, params: { sessions: params_login(@user) }
+
+    # ユーザが削除されず、TOP画面に遷移すること
+    expect {
+      delete user_path(@user_second)
+    }.to change(User, :count).by(0)
+    expect(User.find_by(id: @user_second.id)).to eq @user_second
+
+    follow_redirect!
+    assert_template "static_pages/home"
   end
 end

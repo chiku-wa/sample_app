@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :logged_in_user, only: [:index, :show, :edit, :update]
+  before_action :logged_in_user, only: [:index, :show, :edit, :update, :destroy]
   before_action :correct_user, only: [:edit, :update]
 
   # ユーザ一覧を表示するアクション
@@ -49,6 +49,13 @@ class UsersController < ApplicationController
     end
   end
 
+  def destroy
+    if User.find(params[:id]).destroy
+      flash[:success] = "User deleted"
+      redirect_to users_path
+    end
+  end
+
   # ======================================
   private
 
@@ -70,6 +77,13 @@ class UsersController < ApplicationController
   def correct_user
     @user = User.find(params[:id])
     unless current_user == @user
+      redirect_to(root_path)
+    end
+  end
+
+  # 管理者でない場合はTOP画面に遷移させる
+  def admin_user
+    unless current_user.admin?
       redirect_to(root_path)
     end
   end
