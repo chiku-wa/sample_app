@@ -5,6 +5,8 @@ User.create!(
   password: "123456",
   password_confirmation: "123456",
   admin: true,
+  activated: true,
+  activated_at: Time.zone.now,
 )
 
 # テストユーザ登録
@@ -18,6 +20,8 @@ users = []
     email: email,
     password: password,
     password_confirmation: password,
+    activated: true,
+    activated_at: Time.zone.now,
   )
 end
 User.import(users)

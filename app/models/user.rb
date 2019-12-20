@@ -1,6 +1,7 @@
 class User < ApplicationRecord
-  attr_accessor :remember_token
-  before_save { email.downcase! }
+  attr_accessor :remember_token, :activation_token
+  before_save :down_email
+  before_create { :create_activation_digest }
 
   validates(
     :name,
@@ -59,5 +60,17 @@ class User < ApplicationRecord
   def authenticated?(remember_token)
     return false if remember_digest.nil?
     BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  end
+
+  # ======================================
+  private
+
+  def down_email
+    email.downcase!
+  end
+
+  def create_activation_digest
+    self.activation_token = User.new_token
+    self.activation_digest = User.digest(self.activation_token)
   end
 end

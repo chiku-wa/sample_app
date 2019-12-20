@@ -1,0 +1,9 @@
+<h1>Sample App</h1>
+
+<p>こんにちは <%= @user.name %>さん</p>
+
+<p>
+  ようこそSample Appへ！ユーザ登録ありがとうございます。
+  以下のリンクをクリックして、ユーザ登録を完了してください😆
+</p>
+<%= link_to("ユーザ登録を完了する", edit_account_activation_url(@user.activation_token, { email: @user.email })) %>

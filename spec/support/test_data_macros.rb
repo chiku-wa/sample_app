@@ -7,6 +7,8 @@ module TestDataMacros
         name: Faker::Name.name,
         email: "example-#{i}@railstutorial.org",
         password: "foobar",
+        activated: true,
+        activated_at: Time.zone.now,
       )
     end
     User.import(test_users)

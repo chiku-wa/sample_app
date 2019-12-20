@@ -1,0 +1,5 @@
+こんにちは <%= @user.name %>さん
+
+ようこそSample Appへ！ユーザ登録ありがとうございます。
+以下のリンクをクリックして、ユーザ登録を完了してください😆
+<%= edit_account_activation_url(@user.activation_token, { email: @user.email }) %>

@@ -1,4 +1,4 @@
-require_relative 'boot'
+require_relative "boot"
 
 require "rails"
 # Pick the frameworks you want:
@@ -27,5 +27,16 @@ module SampleApp
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # 表示するタイムゾーン
+    config.time_zone = "Tokyo"
+
+    # ActionMailerで使用するオプション
+    config.action_mailer.default_url_options = {
+      host: "localhost",
+    }
+
+    # DBに登録するときのタイムゾーン
+    config.active_record.default_timezone = :local
   end
 end
