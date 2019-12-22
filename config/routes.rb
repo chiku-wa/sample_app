@@ -13,7 +13,4 @@ Rails.application.routes.draw do
   delete "logout", to: "sessions#destroy"
 
   resources :account_activations, only: [:edit]
-
-  # # letter_openerで送信したメールを確認するためのページ
-  # mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
 end

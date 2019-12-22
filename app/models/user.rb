@@ -1,7 +1,7 @@
 class User < ApplicationRecord
   attr_accessor :remember_token, :activation_token
   before_save :down_email
-  before_create { :create_activation_digest }
+  before_create :create_activation_digest
 
   validates(
     :name,

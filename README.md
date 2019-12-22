@@ -7,6 +7,21 @@
 [*Ruby on Railsチュートリアル*](https://railstutorial.jp)内にあるソースコードはMITライセンス(著作権表記を記しておけば自由に改造、使用することができる)と、Beerwareライセンス(開発者に出会った時にビールを奢ることができる権利)のもとで公開されています。
 詳細は[LICENSE.md](LICENSE.md)を参照してください。
 
+### ■前準備
+#### 環境変数の設定
+* メール送信用のSMTP設定
+メール送信するために、SMTP設定を.envファイルに定義しておくこと。
+
+.env
+```bash
+export SMTP_MAIL_ADDRESS=smtp.gmail.com
+export SMTP_PORT=587
+export SMTP_DOMAIN=smtp.gmail.com
+export SMTP_USER_NAME=<Gmailのアカウント>
+export SMTP_PASSWORD=<Gmailのパスワード>
+
+```
+
 ### ■使い方
 
 #### <u>1.Gitリポジトリをクローンする</u>
