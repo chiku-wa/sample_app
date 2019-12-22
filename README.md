@@ -12,14 +12,20 @@
 * メール送信用のSMTP設定
 メール送信するために、SMTP設定を.envファイルに定義しておくこと。
 
-.env
+[本番用]
 ```bash
 export SMTP_MAIL_ADDRESS=smtp.gmail.com
 export SMTP_PORT=587
 export SMTP_DOMAIN=smtp.gmail.com
 export SMTP_USER_NAME=<Gmailのアカウント>
 export SMTP_PASSWORD=<Gmailのパスワード>
+```
 
+[開発用]
+.env
+```bash
+SMTP_MAIL_ADDRESS=localhost
+SMTP_PORT=1025
 ```
 
 ### ■使い方
