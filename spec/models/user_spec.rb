@@ -5,7 +5,7 @@ RSpec.describe "Userモデルのテスト", type: :model do
     # DBに保存するためのUserインスタンスを生成する
     @user = User.new(
       name: "Tom",
-      email: "tom@example.com",
+      email: "Tom@example.com",
       password: "foobar",
       password_confirmation: "foobar",
     )
@@ -158,6 +158,21 @@ RSpec.describe "Userモデルのテスト", type: :model do
       @user.remember_digest = nil
 
       expect(@user.authenticated?(:remember, @user.remember_token)).to be_falsey
+    end
+
+    it "create_activation_digestメソッドで、有効化トークンと有効化ダイジェストが期待通りであること" do
+      # 保存前は有効化トークンと有効化ダイジェストはnilであること
+      expect(@user.activation_token).to be_blank
+      expect(@user.activation_digest).to be_blank
+
+      @user.save
+
+      # 保存後は有効化ダイジェストに値が設定されていること
+      expect(@user.activation_token).not_to be_blank
+      expect(@user.activation_digest).not_to be_blank
+
+      # 有効化トークンと有効化ダイジェストが一致すること
+      expect(@user.authenticated?(:activation, @user.activation_token)).to be_truthy
     end
   end
 end
