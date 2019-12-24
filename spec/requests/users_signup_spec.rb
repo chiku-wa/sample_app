@@ -16,10 +16,10 @@ RSpec.describe "Users signup", type: :request do
       post users_path, params: { user: params_login(user) }
     }.to change(User, :count).by(1)
 
-    # プロフィール画面に遷移し、ログイン済みになること
+    # TOP画面に遷移し、ログインされないこと
     follow_redirect!
-    assert_template "users/show"
-    assert !!session[:user_id]
+    assert_template "static_pages/home"
+    expect(session[:user_id]).to be_blank
   end
 
   it "無効なユーザ情報をリクエストするとユーザは登録されず、セッションは生成されないこと" do
@@ -36,8 +36,8 @@ RSpec.describe "Users signup", type: :request do
       post users_path, params: { user: params_login(user) }
     }.to change(User, :count).by(0)
 
-    # プロフィール画面に遷移し、ログイン済みになること
+    # サインアップ画面に遷移し、ログインされないこと
     assert_template "users/new"
-    assert !session[:user_id]
+    expect(session[:user_id]).to be_blank
   end
 end

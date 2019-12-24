@@ -17,12 +17,12 @@ RSpec.feature "UsersSignup", type: :feature do
         click_button("Create my account")
       }.to change(User, :count).by(1)
 
-      # プロフィール画面に遷移し、ログイン成功のメッセージが表示されること
-      expect(page).to have_title(full_title(user.name))
-      expect(page).to(have_selector(".alert.alert-success", text: "Welcome to the Sample App!"))
+      # TOP画面に遷移し、ログイン成功のメッセージが表示されること
+      expect(page).to have_title(full_title)
+      expect(page).to(have_selector(".alert.alert-info", text: "Please check your email to activate your account."))
 
-      # ログイン時のみ表示されるボタンが表示されていること
-      display_login_menu
+      # ログアウト状態のみ表示されるボタンが表示されていること
+      display_logout_menu
     end
   end
 

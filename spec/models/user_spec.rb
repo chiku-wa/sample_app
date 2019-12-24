@@ -138,7 +138,7 @@ RSpec.describe "Userモデルのテスト", type: :model do
       @user.save
       @user.remember
 
-      expect(@user.authenticated?(@user.remember_token)).to be_truthy
+      expect(@user.authenticated?(:remember, @user.remember_token)).to be_truthy
     end
 
     it "ahthenticated?メソッドで、記憶トークンが異なる場合はfalseを返すこと" do
@@ -147,7 +147,7 @@ RSpec.describe "Userモデルのテスト", type: :model do
 
       @user.remember_token = "FooBar"
 
-      expect(@user.authenticated?(@user.remember_token)).to be_falsey
+      expect(@user.authenticated?(:remember, @user.remember_token)).to be_falsey
     end
 
     it "authenticated?メソッドで、remember_digestがnilだった場合にfalseを返すこと" do
@@ -157,7 +157,7 @@ RSpec.describe "Userモデルのテスト", type: :model do
       @user.remember_token = "FooBar"
       @user.remember_digest = nil
 
-      expect(@user.authenticated?(@user.remember_token)).to be_falsey
+      expect(@user.authenticated?(:remember, @user.remember_token)).to be_falsey
     end
   end
 end

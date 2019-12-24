@@ -31,7 +31,7 @@ module SessionsHelper
       # セッションが存在せず、CookieにユーザIDと、正しい記憶トークンが登録されていれば
       # ログイン処理を行う
       user = User.find_by(id: cookies.signed[:user_id])
-      if user && user.authenticated?(cookies[:remember_token])
+      if user && user.authenticated?(:remember, cookies[:remember_token])
         log_in(user)
         @current_user = user
       end
