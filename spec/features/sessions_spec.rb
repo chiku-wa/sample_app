@@ -4,6 +4,9 @@ RSpec.feature "Sessions", type: :feature do
   before "テストユーザ登録" do
     @user = FactoryBot.build(:user)
     @user.save
+
+    @user_inactive = FactoryBot.build(:user_inactive)
+    @user_inactive.save
   end
 
   feature "正常なログイン情報を入力" do
@@ -35,6 +38,23 @@ RSpec.feature "Sessions", type: :feature do
       expect(page).to(have_title(full_title(@user.name)))
 
       display_login_menu
+    end
+
+    scenario "有効化されていないユーザでログインしようとするとTOP画面に遷移すること" do
+      visit login_path
+
+      user_inactive = User.new(
+        email: @user_inactive.email,
+        password: @user_inactive.password,
+      )
+      input_login_form(user_inactive, remember_me: false)
+      click_button("Log in")
+
+      # TOP画面に遷移し、メッセージが表示されること
+      expect(page).to(have_title(full_title))
+      expect(page).to(have_selector(".alert.alert-warning", text: "Account not activated.Check your email for the activation link."))
+
+      display_logout_menu
     end
   end
 

@@ -8,6 +8,13 @@ FactoryBot.define do
     activated_at { Time.zone.now }
   end
 
+  factory :user_inactive, class: User do
+    name { "Inactive Tarou" }
+    email { "inactive@example.com" }
+    password { "password" }
+    activated { false }
+  end
+
   # 別セッション用のテストで使用するユーザ
   factory :user_second, class: User do
     name { "Yamada Tarou" }

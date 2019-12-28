@@ -11,19 +11,26 @@ class SessionsController < ApplicationController
 
     user = User.find_by_email(recieve_email.downcase)
 
-    # 該当するメールアドレスを持つユーザが存在し、パスワードも正しければログイン処理を行い、プロフィールを表示する。
-    # そうでなければ、ログイン画面にエラーメッセージを表示して戻す。
+    # 該当するメールアドレスを持つユーザが存在し、パスワードも正しければログイン処理を行う
+    # 有効化されているユーザの場合のみログイン処理を行う
     if user && user.authenticate(recieve_password)
-      log_in(user)
+      if user.activated?
+        log_in(user)
 
-      # remember_meにチェックが入れられている場合のみ、記憶トークンを保存する
-      if recieve_remember_me.to_i == 1
-        remember(user)
+        # remember_meにチェックが入れられている場合のみ、記憶トークンを保存する
+        # チェックが入れられていない場合は記憶トークンを削除する
+        if recieve_remember_me.to_i == 1
+          remember(user)
+        else
+          forget(user)
+        end
+
+        redirect_back_or user
       else
-        forget(user)
+        message = "Account not activated.Check your email for the activation link."
+        flash[:warning] = message
+        redirect_to(root_url)
       end
-
-      redirect_back_or user
     else
       flash.now[:danger] = "Invalid email/password combination"
       render "new"
