@@ -1,14 +1,11 @@
 class AccountActivationsController < ApplicationController
+  # ユーザに送ったメール本文の有効化リンクをクリックしたときのアクション
   def edit
     user = User.find_by(email: params[:email])
 
-    # ユーザに送ったメール本文の有効化リンクをクリックしたときのアクション
-    if !user.activated? && user.authenticated?(:activation, params[:id])
+    if user && !user.activated? && user.authenticated?(:activation, params[:id])
       # ユーザの有効化
-      user.transaction do
-        user.update_attribute(:activated, true)
-        user.update_attribute(:activated_at, Time.zone.now)
-      end
+      user.activate
 
       # ログインしてプロフィール画面に遷移する
       log_in(user)

@@ -9,10 +9,9 @@ class SessionsController < ApplicationController
     recieve_password = params[:sessions][:password]
     recieve_remember_me = params[:sessions][:remember_me]
 
-    user = User.find_by_email(recieve_email.downcase)
-
     # 該当するメールアドレスを持つユーザが存在し、パスワードも正しければログイン処理を行う
     # 有効化されているユーザの場合のみログイン処理を行う
+    user = User.find_by_email(recieve_email.downcase)
     if user && user.authenticate(recieve_password)
       if user.activated?
         log_in(user)
@@ -27,8 +26,7 @@ class SessionsController < ApplicationController
 
         redirect_back_or user
       else
-        message = "Account not activated.Check your email for the activation link."
-        flash[:warning] = message
+        flash[:warning] = "Account not activated.Check your email for the activation link."
         redirect_to(root_url)
       end
     else

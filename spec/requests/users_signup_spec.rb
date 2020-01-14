@@ -16,6 +16,9 @@ RSpec.describe "Users signup", type: :request do
       post users_path, params: { user: params_login(user) }
     }.to change(User, :count).by(1)
 
+    # メールが1件送信されていること
+    expect(ActionMailer::Base.deliveries.size).to eq 1
+
     # TOP画面に遷移し、ログインされないこと
     follow_redirect!
     assert_template "static_pages/home"
@@ -35,6 +38,9 @@ RSpec.describe "Users signup", type: :request do
     expect {
       post users_path, params: { user: params_login(user) }
     }.to change(User, :count).by(0)
+
+    # メールが送信されていないこと
+    expect(ActionMailer::Base.deliveries.size).to eq 0
 
     # サインアップ画面に遷移し、ログインされないこと
     assert_template "users/new"

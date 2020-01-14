@@ -79,22 +79,33 @@ RSpec.describe "UsersController-requests", type: :request do
     it "直接アクセス、Next、Previousが正常に機能すること" do
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
-      expect_number_of = 30
+      expect_number_of_one = User.where(activated: true).paginate(page: 1).each.size
+      # 1ページに移動しても想定通りの件数が表示されること
+      get users_path, params: { page: 1 }
+      assert_template "users/index"
+      expect(assigns[:users].size).to eq expect_number_of_one
+      # ページ指定無しの場合は1ページ目を指定した場合と結果が同じであること
+      get users_path, params: { page: nil }
+      assert_template "users/index"
+      expect(assigns[:users].size).to eq expect_number_of_one
+
+      expect_number_of_two = User.where(activated: true).paginate(page: 2).each.size
+      # 次のページに移動しても想定通りの件数であること
+      get users_path, params: { page: 2 }
+      assert_template "users/index"
+      expect(assigns[:users].size).to eq expect_number_of_two
+    end
+
+    it "有効化されていないユーザが取得できないこと" do
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
       # ページ指定無しの場合でも正常に表示されること
       get users_path, params: { page: nil }
       assert_template "users/index"
-      expect(assigns[:users].size).to eq expect_number_of
 
-      # 次のページに移動しても想定通りの値が表示されること
-      get users_path, params: { page: 2 }
-      assert_template "users/index"
-      expect(assigns[:users].size).to eq expect_number_of
-
-      # 前のページに移動しても想定通りの値が表示されること
-      get users_path, params: { page: 1 }
-      assert_template "users/index"
-      expect(assigns[:users].size).to eq expect_number_of
+      # 有効化されていないユーザが取得できないこと
+      expect(assigns[:users].where(activated: true).size).not_to eq 0
+      expect(assigns[:users].where(activated: false).size).to eq 0
     end
   end
 

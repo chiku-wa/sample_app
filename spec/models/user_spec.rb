@@ -160,6 +160,23 @@ RSpec.describe "Userモデルのテスト", type: :model do
       expect(@user.authenticated?(:remember, @user.remember_token)).to be_falsey
     end
 
+    it "acitvateメソッドで、有効化フラグと有効化した日時が登録されること" do
+      expect(@user.activated).to be_falsey
+      expect(@user.activated_at).to be_blank
+
+      @user.activate
+
+      expect(@user.activated).to be_truthy
+      expect(@user.activated_at).not_to be_blank
+    end
+
+    it "send_activation_mailメソッドで、メールが1通送信されること" do
+      @user.save
+      @user.send_activation_mail
+
+      expect(ActionMailer::Base.deliveries.size).to eq 1
+    end
+
     it "create_activation_digestメソッドで、有効化トークンと有効化ダイジェストが期待通りであること" do
       # 保存前は有効化トークンと有効化ダイジェストはnilであること
       expect(@user.activation_token).to be_blank

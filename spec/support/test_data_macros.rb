@@ -1,5 +1,6 @@
 module TestDataMacros
   # 引数として渡した数だけUserデータを作成するメソッド
+  # 有効されている/されていないユーザを登録する
   def generate_test_users(number_of = 1)
     test_users = []
     number_of.times do |i|
@@ -7,7 +8,7 @@ module TestDataMacros
         name: Faker::Name.name,
         email: "example-#{i}@railstutorial.org",
         password: "foobar",
-        activated: true,
+        activated: i.even? ? true : false,
         activated_at: Time.zone.now,
       )
     end
