@@ -44,6 +44,7 @@ RSpec.describe "UsersController-requests", type: :request do
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
       follow_redirect!
       assert_template "users/show"
+      expect(assigns[:user].id).to eq @user.id
 
       # 記憶されたURLがリセットされていること
       expect(session[:forwarding_url]).to be_blank
@@ -109,6 +110,27 @@ RSpec.describe "UsersController-requests", type: :request do
     end
   end
 
+  context "ユーザ参照(プロフィール)画面に関するテスト" do
+    it "ログインしたあとに自身のプロフィール画面を遷移すること" do
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      follow_redirect!
+      assert_template "users/show"
+      expect(assigns[:user].id).to eq @user.id
+    end
+
+    it "無効なユーザのプロフィールを閲覧しようとした場合はTOP画面に遷移すること" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+      @user.activated = false
+      @user.save
+
+      get user_path(@user)
+      follow_redirect!
+      assert_template "static_pages/home"
+    end
+  end
+
   context "ユーザ更新機能に関するテスト" do
     it "ユーザが正常に更新されること" do
       # ログインする
@@ -144,6 +166,7 @@ RSpec.describe "UsersController-requests", type: :request do
       # 更新に成功した場合はプロフィール画面に遷移すること
       follow_redirect!
       assert_template "users/show"
+      expect(assigns[:user].id).to eq user.id
     end
 
     it "不正な値の場合はユーザが更新されないこと" do
@@ -215,6 +238,7 @@ RSpec.describe "UsersController-requests", type: :request do
       follow_redirect!
       expect(response).to(have_http_status("200"))
       assert_template "users/show"
+      expect(assigns[:user].id).to eq @user.id
     end
   end
 

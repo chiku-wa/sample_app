@@ -11,6 +11,10 @@ class UsersController < ApplicationController
   # ユーザプロフィール画面を表示するアクション
   def show
     @user = User.find(params[:id])
+    unless @user.activated
+      redirect_to(root_url)
+      return
+    end
   end
 
   # サインアップ(ユーザ新規作成)画面を表示するアクション
