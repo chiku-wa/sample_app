@@ -2,7 +2,6 @@ Rails.application.configure do
   # SMTPサーバ設定
   config.action_mailer.delivery_method = :smtp
   host = "tutorial-sampleapplication.herokuapp.com"
-  config.action_mailer.default_url_options = { host: host }
   config.action_mailer.smtp_settings = {
     enable_starttls_auto: true,
     address: ENV["SMTP_DOMAIN"],
