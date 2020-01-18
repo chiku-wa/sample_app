@@ -3,8 +3,12 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: "localhost:3000" }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address: ENV["SMTP_MAIL_ADDRESS"],
+    address: ENV["SMTP_DOMAIN"],
     port: ENV["SMTP_PORT"],
+    domain: ENV["SMTP_DOMAIN"],
+    user_name: ENV["SMTP_USER_NAME"],
+    password: ENV["SMTP_PASSWORD"],
+    authentication: "login",
   }
 
   # Settings specified here will take precedence over those in config/application.rb.
