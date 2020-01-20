@@ -1,4 +1,5 @@
 Rails.application.config.generators do |g|
+  g.skip_routes true
   g.stylesheets false
   g.javascripts false
   g.helper false
