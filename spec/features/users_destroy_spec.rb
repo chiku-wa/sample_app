@@ -22,7 +22,6 @@ RSpec.feature "UsersDestroy", type: :feature do
 
       # 現在ログインしているユーザの削除リンクは表示されていないことを確認する
       expect(page).not_to(have_xpath("//a[@data-method='delete' and @href='#{user_path(@admin_user.id)}']"))
-      # expect(html).to(have_css("link[rel='next']", visible: false))
 
       # 管理者以外のユーザの削除リンクが存在し、削除ボタンを押すとユーザが削除されること
       user = User.find_by(admin: false)
