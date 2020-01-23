@@ -99,29 +99,4 @@ RSpec.feature "Sessions", type: :feature do
       display_logout_menu
     end
   end
-
-  # TODO:
-  # 以下のテストはCookieを保持したままブラウザを開き直す処理が実装できていないためPending
-  # Capybaraのドライバなどを選定し、実装する
-  pending "remember_meにチェックを入れた状態ログインした場合、ブラウザを開き直してもログイン状態が保持されること" do
-    visit login_path
-
-    user = User.new(
-      email: @user.email,
-      password: @user.password,
-    )
-    input_login_form(user, remember_me: true)
-    click_button("Log in")
-
-    expect(page).to(have_title(full_title(@user.name)))
-
-    display_login_menu
-
-    # セッションを閉じて開き直してもログイン状態が保持されていること
-    # puts page.methods.sort.join("\n") #.driver.browser.methods
-    page.quit
-    visit root_path
-    page.refresh
-    display_login_menu
-  end
 end
