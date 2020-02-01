@@ -52,7 +52,7 @@ RSpec.feature "Sessions", type: :feature do
 
       # TOP画面に遷移し、メッセージが表示されること
       expect(page).to(have_title(full_title))
-      expect(page).to(have_selector(".alert.alert-warning", text: "Account not activated.Check your email for the activation link."))
+      expect(page).to have_selector(".alert.alert-warning", text: "Account not activated.Check your email for the activation link.")
 
       display_logout_menu
     end
@@ -70,12 +70,12 @@ RSpec.feature "Sessions", type: :feature do
       click_button("Log in")
 
       # ログインフォーム画面でエラーが表示されること
-      expect(page).to(have_selector(".alert.alert-danger", text: "Invalid email/password combination"))
+      expect(page).to have_selector(".alert.alert-danger", text: "Invalid email/password combination")
 
       # ホーム画面に遷移したときはエラーが表示され【ない】こと
       # ヘッダのHomeリンクをクリック
       click_link("Home")
-      expect(page).to_not(have_selector(".alert.alert-danger", text: "Invalid email/password combination"))
+      expect(page).to_not have_selector(".alert.alert-danger", text: "Invalid email/password combination")
 
       # 未ログイン時のみ表示されるボタンが表示されていること、ログイン時のみ表示するボタンが表示されていないこと
       display_logout_menu

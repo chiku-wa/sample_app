@@ -138,6 +138,6 @@ RSpec.feature "UsersEdit", type: :feature do
     expect(page).to(have_content(user_name))
 
     # 更新成功のメッセージが表示されること
-    expect(page).to(have_selector(".alert.alert-success", text: "Profile updated"))
+    expect(page).to have_selector(".alert.alert-success", text: "Profile updated")
   end
 end

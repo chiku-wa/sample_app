@@ -19,7 +19,7 @@ RSpec.feature "UsersSignup", type: :feature do
 
       # TOP画面に遷移し、ログイン成功のメッセージが表示されること
       expect(page).to have_title(full_title)
-      expect(page).to(have_selector(".alert.alert-info", text: "Please check your email to activate your account."))
+      expect(page).to have_selector(".alert.alert-info", text: "Please check your email to activate your account.")
 
       # ログアウト状態のみ表示されるボタンが表示されていること
       display_logout_menu

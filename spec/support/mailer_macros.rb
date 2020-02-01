@@ -1,3 +1,4 @@
+# メール送信テストのサポート用モジュール
 module MailerMacros
   # HTML、テキストの本文が想定どおりであることを確認する
   def expected_body(mail, expected_string)

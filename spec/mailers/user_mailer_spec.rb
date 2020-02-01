@@ -30,4 +30,25 @@ RSpec.describe UserMailer, type: :mailer do
       expected_body(mail, CGI.escape(@user.email))
     end
   end
+
+  context "パスワード再設定用メール送信のテスト" do
+    it "メール送信処理が成功すること" do
+      mail = UserMailer.password_reset(@user)
+
+      expect { mail.deliver_now }.to change(ActionMailer::Base.deliveries, :count).by(1)
+    end
+
+    it "送り主、宛先(To,Cc,Bcc)、件名、本文が想定通りであること" do
+      mail = UserMailer.password_reset(@user)
+
+      expect(mail.from).to eq ["noreply@example.com"]
+      expect(mail.to).to eq [@user.email]
+      expect(mail.cc).to be_nil
+      expect(mail.bcc).to be_nil
+      expect(mail.subject).to eq "パスワードを再設定してください"
+
+      # 必要な情報が含まれていること
+      expected_body(mail, @user.name)
+    end
+  end
 end

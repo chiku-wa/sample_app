@@ -60,10 +60,4 @@ module LoginMacros
     expect(page).not_to(have_link("Settings"))
     expect(page).not_to(have_link("Log out"))
   end
-
-  # TODO:ユーザ更新機能が完成次第実装する
-  # 想定したプロフィール画面が表示されていること
-  # def display_profile(name:)
-  #   expect(page).to(have_content)
-  # end
 end
