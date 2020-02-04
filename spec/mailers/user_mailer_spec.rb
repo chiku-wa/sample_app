@@ -5,6 +5,7 @@ RSpec.describe UserMailer, type: :mailer do
     # テストユーザ登録
     @user = FactoryBot.build(:user)
     @user.activation_token = User.new_token
+    @user.create_reset_digest
     @user.save
   end
 
@@ -49,6 +50,8 @@ RSpec.describe UserMailer, type: :mailer do
 
       # 必要な情報が含まれていること
       expected_body(mail, @user.name)
+      expected_body(mail, @user.reset_token)
+      expected_body(mail, CGI.escape(@user.email))
     end
   end
 end

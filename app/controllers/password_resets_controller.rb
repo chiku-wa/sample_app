@@ -1,4 +1,6 @@
 class PasswordResetsController < ApplicationController
+  before_action :get_user, only: [:edit, :update]
+  before_action :valid_user, only: [:edit, :update]
 
   # パスワード再設定リクエスト画面に遷移するアクション
   def new
@@ -34,5 +36,32 @@ class PasswordResetsController < ApplicationController
 
   # パスワード再設定用画面(メール本文からリンク)に遷移するアクション
   def edit
+    @user = User.find_by(email: params[:email])
+    unless (@user &&
+            @user.activated? &&
+            @user.authenticated?(:reset, params[:id]))
+      redirect_to root_path
+    end
+  end
+
+  # パスワードを再設定するアクション
+  def update
+  end
+
+  # ======================================
+  private
+
+  # パラメータとして受け取ったメールアドレスでユーザを検索してインスタンス変数に格納するメソッド
+  def get_user
+    @user = User.find_by(email: params[:email])
+  end
+
+  # 該当するメールアドレスを持たない or 有効でない or トークンが一致しない場合はTOP画面に遷移するメソッド
+  def valid_user
+    unless (@user &&
+            @user.activated? &&
+            @user.authenticated?(:reset, params[:id]))
+      redirect_to root_path
+    end
   end
 end
