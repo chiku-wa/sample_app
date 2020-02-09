@@ -22,12 +22,14 @@ RSpec.describe "PasswordReset-requests", type: :request do
       expect(ActionMailer::Base.deliveries.size).to eq 1
     end
 
-    it "存在しないメールアドレスでパスワード再設定をリクエストするとダイジェスト・トークンが生成されず、メールが送信されないこと" do
+    it "存在しないメールアドレスでパスワード再設定をリクエストすると
+      ダイジェスト・トークンが生成されず、メールが送信されないこと" do
       post password_resets_path, params: { "password_reset[email]": "invalid.email" }
       expect(ActionMailer::Base.deliveries.size).to eq 0
     end
 
-    it "有効化されていないユーザのメールアドレスでパスワード再設定をリクエストするとダイジェスト・トークンが生成されず、メールが送信されないこと" do
+    it "有効化されていないユーザのメールアドレスでパスワード再設定をリクエストすると
+      ダイジェスト・トークンが生成されず、メールが送信されないこと" do
       post password_resets_path, params: { "password_reset[email]": @user_inactive }
       expect(ActionMailer::Base.deliveries.size).to eq 0
     end
@@ -76,6 +78,28 @@ RSpec.describe "PasswordReset-requests", type: :request do
 
       follow_redirect!
       assert_template "static_pages/home"
+    end
+
+    it "有効期限が切れている場合はパスワード再設定リクエスト用画面に遷移すること" do
+      @user.create_reset_digest
+
+      # 有効期限切れの基準となる2時間を設定
+      @user.reset_sent_at = @user.reset_sent_at.ago(2.hours)
+      @user.save
+
+      get edit_password_reset_path(@user.reset_token, email: @user.email)
+
+      follow_redirect!
+      assert_template "password_resets/new"
+    end
+
+    it "有効期限が切れて【いない】場合はパスワード再設定画面に遷移すること" do
+      @user.create_reset_digest
+      @user.save
+
+      get edit_password_reset_path(@user.reset_token, email: @user.email)
+
+      assert_template "password_resets/edit"
     end
   end
 end

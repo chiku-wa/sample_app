@@ -61,8 +61,9 @@ class UsersController < ApplicationController
   # ======================================
   private
 
-  # パラメータとしてリクエストされたユーザ情報を適切な形式にして返すメソッド
+  # クライアントから不正なパラメータをリクエストされないように、指定できるパラメータを制限するためのメソッド
   def user_params
+    # permitメソッドの引数に渡した名称のパラメータしか指定できない
     params.require(:user).permit(:name, :email, :password, :password_confirmation)
   end
 

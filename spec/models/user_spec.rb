@@ -217,8 +217,7 @@ RSpec.describe "Userモデルのテスト", type: :model do
       @user.create_reset_digest
       @user.save
 
-      @user.reset_sent_at = @user.reset_sent_at
-        .ago(2.hours)
+      @user.reset_sent_at = @user.reset_sent_at.ago(2.hours)
       expect(@user.password_reset_expired?).to be_truthy
     end
 
@@ -228,9 +227,7 @@ RSpec.describe "Userモデルのテスト", type: :model do
       @user.create_reset_digest
       @user.save
 
-      @user.reset_sent_at = @user.reset_sent_at
-        .ago(1.hours)
-        .ago(59.minutes)
+      @user.reset_sent_at = @user.reset_sent_at.ago(1.hours).ago(59.minutes)
       expect(@user.password_reset_expired?).to be_falsey
     end
   end
