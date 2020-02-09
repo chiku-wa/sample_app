@@ -1,6 +1,7 @@
 class PasswordResetsController < ApplicationController
   before_action :get_user, only: [:edit, :update]
   before_action :valid_user, only: [:edit, :update]
+  before_action :check_password_reset_expiration, only: [:edit, :update]
 
   # パスワード再設定リクエスト画面に遷移するアクション
   def new
@@ -62,6 +63,15 @@ class PasswordResetsController < ApplicationController
             @user.activated? &&
             @user.authenticated?(:reset, params[:id]))
       redirect_to root_path
+    end
+  end
+
+  # パスワード再設定リクエストを出してから一定の期間が過ぎていた場合は、
+  # パスワード再設定リクエスト用画面を表示する
+  def check_password_reset_expiration
+    if @user.password_reset_expired?
+      flash[:danger] = "The URL has expired. Please reset your password again."
+      redirect_to new_password_reset_path
     end
   end
 end

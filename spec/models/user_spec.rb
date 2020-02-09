@@ -210,5 +210,28 @@ RSpec.describe "Userモデルのテスト", type: :model do
       # トークンとダイジェストが一致すること
       expect(@user.authenticated?(:reset, @user.reset_token)).to be_truthy
     end
+
+    it "password_reset_expired?メソッドで、reset_sent_atの日時から2時間経過していたら
+      期限切れとみなすこと" do
+      # パスワード再設定ダイジェストとトークンを発行する
+      @user.create_reset_digest
+      @user.save
+
+      @user.reset_sent_at = @user.reset_sent_at
+        .ago(2.hours)
+      expect(@user.password_reset_expired?).to be_truthy
+    end
+
+    it "password_reset_expired?メソッドで、reset_sent_atの日時から1時間59分経過していたら
+      期限切れと【みなさない】こと" do
+      # パスワード再設定ダイジェストとトークンを発行する
+      @user.create_reset_digest
+      @user.save
+
+      @user.reset_sent_at = @user.reset_sent_at
+        .ago(1.hours)
+        .ago(59.minutes)
+      expect(@user.password_reset_expired?).to be_falsey
+    end
   end
 end

@@ -87,6 +87,12 @@ class User < ApplicationRecord
     update_attribute(:reset_sent_at, Time.zone.now)
   end
 
+  # パスワード再設定をリクエストしてからの猶予期間が過ぎているならtrueを返す
+  def password_reset_expired?
+    # 現在時刻より2時間以上過去なら猶予期間を過ぎているとみなす
+    reset_sent_at < 2.hours.ago
+  end
+
   # ======================================
   private
 
