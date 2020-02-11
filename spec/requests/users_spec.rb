@@ -160,8 +160,11 @@ RSpec.describe "UsersController-requests", type: :request do
       user = User.find(@user.id)
       expect(user.name).to eq modify_name
       expect(user.email).to eq modify_email
-      # パスワードは、更新前の値と一致していないことを確認する
-      expect(user.password).not_to eq before_password
+
+      # 更新前のパスワードで認証できないこと(=変更されていること)を確認する
+      expect(user.authenticate(before_password)).to be_falsey
+      # 更新後のパスワードで認証できることを確認する
+      expect(user.authenticate(modify_password)).to be_truthy
 
       # 更新に成功した場合はプロフィール画面に遷移すること
       follow_redirect!
