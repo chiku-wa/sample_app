@@ -52,6 +52,9 @@ RSpec.describe UserMailer, type: :mailer do
       expected_body(mail, @user.name)
       expected_body(mail, @user.reset_token)
       expected_body(mail, CGI.escape(@user.email))
+
+      # ---Fixme 以下の記述方法ではパスワード再設定のリンク文字のテストがパスしないため修正する
+      # expected_body(mail, edit_password_reset_url(@user.reset_token, email: @user.email))
     end
   end
 end
