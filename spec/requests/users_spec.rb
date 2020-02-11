@@ -141,9 +141,6 @@ RSpec.describe "UsersController-requests", type: :request do
       expect(response).to(have_http_status("200"))
       assert_template "users/edit"
 
-      # パスワードの変更されたことを確認するために、変更前のパスワードを保存する
-      before_password = User.find(@user.id).password_digest
-
       # ユーザを更新
       modify_name = @user.name + "_modify"
       modify_email = "modify" + @user.email
@@ -161,8 +158,6 @@ RSpec.describe "UsersController-requests", type: :request do
       expect(user.name).to eq modify_name
       expect(user.email).to eq modify_email
 
-      # 更新前のパスワードで認証できないこと(=変更されていること)を確認する
-      expect(user.authenticate(before_password)).to be_falsey
       # 更新後のパスワードで認証できることを確認する
       expect(user.authenticate(modify_password)).to be_truthy
 
