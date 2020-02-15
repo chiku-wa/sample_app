@@ -47,10 +47,35 @@ class PasswordResetsController < ApplicationController
 
   # パスワードを再設定するアクション
   def update
+    recieve_password = params[:user][:password]
+
+    # パスワードが未設定なら、パスワード再設定画面に遷移する
+    # ※空白文字の場合はValidationを通過しないため、個別にチェックする
+    if recieve_password.blank?
+      flash.now[:danger] = "Password is empty."
+      @user.errors.add(:password, :blank)
+      render "edit" and return
+    end
+
+    if @user.update_attributes(user_params)
+      # 更新が成功したらログインした状態にしてプロフィール画面に遷移する。
+      log_in(@user)
+      flash[:success] = "Password has been reset."
+      redirect_to(@user)
+    else
+      # 失敗した場合(Validationを通羽化しなかった場合)は再度パスワード再設定用ページに遷移する
+      render "edit" and return
+    end
   end
 
   # ======================================
   private
+
+  # クライアントから不正なパラメータをリクエストされないように、指定できるパラメータを制限するためのメソッド
+  def user_params
+    # permitメソッドの引数に渡した名称のパラメータしか指定できない
+    params.require(:user).permit(:password, :password_confirmation)
+  end
 
   # パラメータとして受け取ったメールアドレスでユーザを検索してインスタンス変数に格納するメソッド
   def get_user

@@ -102,4 +102,66 @@ RSpec.describe "PasswordReset-requests", type: :request do
       assert_template "password_resets/edit"
     end
   end
+
+  context "パスワード更新処理に関するテスト" do
+    it "パスワードが正常に更新されること" do
+      # パスワードを変更する
+      modify_password = "123456"
+
+      request_reset_password(@user, modify_password)
+
+      # パスワードが変更されていること
+      @user.reload
+      expect(@user.authenticate(modify_password)).to be_truthy
+
+      follow_redirect!
+      assert_template "users/show"
+    end
+
+    it "パスワードが空欄の場合は再設定画面に戻ること" do
+      # パスワードを変更する
+      empty_password = ""
+
+      request_reset_password(@user, empty_password)
+
+      # パスワードが変更されていないこと
+      @user.reload
+      expect(@user.authenticate(empty_password)).to be_falsey
+
+      assert_template "password_resets/edit"
+    end
+
+    it "不正なパスワードを指定した場合は再設定画面に戻ること" do
+      # 6文字未満
+      invalid_password = "12345"
+
+      request_reset_password(@user, invalid_password)
+
+      # パスワードが変更されていないこと
+      @user.reload
+      expect(@user.authenticate(invalid_password)).to be_falsey
+
+      assert_template "password_resets/edit"
+    end
+  end
+
+  # ======================================
+  private
+
+  # トークンとダイジェストを生成し、パスワード再設定をリクエストするメソッド
+  def request_reset_password(user, password)
+    # リクエストに必要なトークンとダイジェストを生成する
+    @user.create_reset_digest
+    @user.save
+
+    # PATCHメソッドでリクエストする
+    patch(
+      password_reset_path(@user.reset_token),
+      params: {
+        "email" => user.email,
+        "user[password]" => password,
+        "user[password_confirmation]" => password,
+      },
+    )
+  end
 end
