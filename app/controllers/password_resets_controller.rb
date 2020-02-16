@@ -52,7 +52,6 @@ class PasswordResetsController < ApplicationController
     # パスワードが未設定なら、パスワード再設定画面に遷移する
     # ※空白文字の場合はValidationを通過しないため、個別にチェックする
     if recieve_password.blank?
-      flash.now[:danger] = "Password is empty."
       @user.errors.add(:password, :blank)
       render "edit" and return
     end
@@ -63,7 +62,7 @@ class PasswordResetsController < ApplicationController
       flash[:success] = "Password has been reset."
       redirect_to(@user)
     else
-      # 失敗した場合(Validationを通羽化しなかった場合)は再度パスワード再設定用ページに遷移する
+      # 失敗した場合(Validationを通過しなかった場合)は再度パスワード再設定用ページに遷移する
       render "edit" and return
     end
   end
