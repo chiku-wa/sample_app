@@ -83,8 +83,10 @@ class User < ApplicationRecord
   # パスワード再設定用ダイジェストとトークンを発行する
   def create_reset_digest
     self.reset_token = User.new_token
-    update_attribute(:reset_digest, User.digest(self.reset_token))
-    update_attribute(:reset_sent_at, Time.zone.now)
+    update_attributes(
+      reset_digest: User.digest(self.reset_token),
+      reset_sent_at: Time.zone.now,
+    )
   end
 
   # パスワード再設定をリクエストしてからの猶予期間が過ぎているならtrueを返す

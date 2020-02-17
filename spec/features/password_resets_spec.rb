@@ -1,6 +1,11 @@
 require "rails_helper"
 
 RSpec.feature "PasswordResets", type: :feature do
+
+  # ====== 定数定義
+  # メール本文から、アプリケーションの相対URLを抜き出すための正規表現
+  RELATIVE_URL_REGEX = /(?:"https?\:\/\/.*?)(\/.*?)(?:")/
+
   before "テストユーザ登録" do
     @user = FactoryBot.build(:user)
     @user.save
@@ -75,6 +80,43 @@ RSpec.feature "PasswordResets", type: :feature do
       expect(page).to have_selector(".alert", count: 1)
     end
 
+    scenario "2時間経過した場合はエラーメッセージが表示されること" do
+      operation_request(@user.email)
+
+      # パスワードリセット日時を2時間前に設定する
+      @user.reload
+      @user.update_attributes(reset_sent_at: @user.reset_sent_at.ago(2.hours))
+
+      # 受信したメールのリンクにアクセスし、パスワード再設定画面に遷移する
+      mail = ActionMailer::Base.deliveries.last
+
+      # メール本文(HTML)内のリンクの相対パスを抜き出してアクセスする
+      reset_path = mail.html_part.body.to_s.scan(RELATIVE_URL_REGEX).join
+      visit reset_path
+
+      expect(page).to have_title(full_title("Forgot password"))
+      expect(page).to have_selector(
+        ".alert.alert-danger",
+        text: "The URL has expired. Please reset your password again.",
+      )
+    end
+
+    scenario "パスワード再設定画面のリンクを2回アクセスした場合、2回目はアクセスできないこと" do
+      operation_request(@user.email)
+
+      modify_password = "123456"
+
+      # 1回目は成功すること
+      operation_reset(modify_password, modify_password)
+      expect(page).to have_title(full_title(@user.name))
+
+      # 2回目はアクセスできず、TOP画面に遷移すること
+      mail = ActionMailer::Base.deliveries.last
+      reset_path = mail.html_part.body.to_s.scan(RELATIVE_URL_REGEX).join
+      visit reset_path
+      expect(page).to have_title(full_title, exact: true)
+    end
+
     scenario "パスワードが空欄の場合はエラーメッセージが表示されること" do
       operation_request(@user.email)
 
@@ -120,7 +162,7 @@ RSpec.feature "PasswordResets", type: :feature do
     mail = ActionMailer::Base.deliveries.last
 
     # メール本文(HTML)内のリンクの相対パスを抜き出してアクセスする
-    reset_path = mail.html_part.body.to_s.scan(/(?:"https?\:\/\/.*?)(\/.*?)(?:")/).join
+    reset_path = mail.html_part.body.to_s.scan(RELATIVE_URL_REGEX).join
     visit reset_path
 
     # パスワードを再設定する

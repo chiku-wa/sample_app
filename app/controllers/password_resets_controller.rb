@@ -59,6 +59,7 @@ class PasswordResetsController < ApplicationController
     if @user.update_attributes(user_params)
       # 更新が成功したらログインした状態にしてプロフィール画面に遷移する。
       log_in(@user)
+      @user.update_attributes(reset_digest: nil) # 連続して更新操作が行われた場合を考慮し、ダイジェストはnilにしておく
       flash[:success] = "Password has been reset."
       redirect_to(@user)
     else
