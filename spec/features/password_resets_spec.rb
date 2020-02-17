@@ -87,12 +87,7 @@ RSpec.feature "PasswordResets", type: :feature do
       @user.reload
       @user.update_attributes(reset_sent_at: @user.reset_sent_at.ago(2.hours))
 
-      # 受信したメールのリンクにアクセスし、パスワード再設定画面に遷移する
-      mail = ActionMailer::Base.deliveries.last
-
-      # メール本文(HTML)内のリンクの相対パスを抜き出してアクセスする
-      reset_path = mail.html_part.body.to_s.scan(RELATIVE_URL_REGEX).join
-      visit reset_path
+      visit_reset_path
 
       expect(page).to have_title(full_title("Forgot password"))
       expect(page).to have_selector(
@@ -106,14 +101,12 @@ RSpec.feature "PasswordResets", type: :feature do
 
       modify_password = "123456"
 
-      # 1回目は成功すること
+      # 1回目のパスワードリセットは成功すること
       operation_reset(modify_password, modify_password)
       expect(page).to have_title(full_title(@user.name))
 
-      # 2回目はアクセスできず、TOP画面に遷移すること
-      mail = ActionMailer::Base.deliveries.last
-      reset_path = mail.html_part.body.to_s.scan(RELATIVE_URL_REGEX).join
-      visit reset_path
+      # 2回目はパスワード再設定画面にアクセスすらできず、パスワード再設定リクエスト画面に遷移すること
+      visit_reset_path
       expect(page).to have_title(full_title, exact: true)
     end
 
@@ -156,14 +149,19 @@ RSpec.feature "PasswordResets", type: :feature do
     end
   end
 
-  # 受信したメール本文のリンクをクリックし、パスワードリセットを行うメソッド
-  def operation_reset(password = "", password_confirmation = "")
+  # 受信したメール本文のリンクをクリックし、パスワード再設定画面にアクセスするメソッド
+  def visit_reset_path
     # 受信したメールのリンクにアクセスし、パスワード再設定画面に遷移する
     mail = ActionMailer::Base.deliveries.last
 
     # メール本文(HTML)内のリンクの相対パスを抜き出してアクセスする
     reset_path = mail.html_part.body.to_s.scan(RELATIVE_URL_REGEX).join
     visit reset_path
+  end
+
+  # パスワード再設定画面からパスワードリセットを行うメソッド
+  def operation_reset(password = "", password_confirmation = "")
+    visit_reset_path
 
     # パスワードを再設定する
     fill_in("user[password]", with: password)
