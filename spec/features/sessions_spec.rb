@@ -52,7 +52,7 @@ RSpec.feature "Sessions", type: :feature do
 
       # TOP画面に遷移し、メッセージが表示されること
       expect(page).to(have_title(full_title))
-      expect(page).to(have_selector(".alert.alert-warning", text: "Account not activated.Check your email for the activation link."))
+      expect(page).to have_selector(".alert.alert-warning", text: "Account not activated.Check your email for the activation link.")
 
       display_logout_menu
     end
@@ -70,12 +70,12 @@ RSpec.feature "Sessions", type: :feature do
       click_button("Log in")
 
       # ログインフォーム画面でエラーが表示されること
-      expect(page).to(have_selector(".alert.alert-danger", text: "Invalid email/password combination"))
+      expect(page).to have_selector(".alert.alert-danger", text: "Invalid email/password combination")
 
       # ホーム画面に遷移したときはエラーが表示され【ない】こと
       # ヘッダのHomeリンクをクリック
       click_link("Home")
-      expect(page).to_not(have_selector(".alert.alert-danger", text: "Invalid email/password combination"))
+      expect(page).to_not have_selector(".alert.alert-danger", text: "Invalid email/password combination")
 
       # 未ログイン時のみ表示されるボタンが表示されていること、ログイン時のみ表示するボタンが表示されていないこと
       display_logout_menu
@@ -98,30 +98,5 @@ RSpec.feature "Sessions", type: :feature do
       expect(page).to(have_title(full_title))
       display_logout_menu
     end
-  end
-
-  # TODO:
-  # 以下のテストはCookieを保持したままブラウザを開き直す処理が実装できていないためPending
-  # Capybaraのドライバなどを選定し、実装する
-  pending "remember_meにチェックを入れた状態ログインした場合、ブラウザを開き直してもログイン状態が保持されること" do
-    visit login_path
-
-    user = User.new(
-      email: @user.email,
-      password: @user.password,
-    )
-    input_login_form(user, remember_me: true)
-    click_button("Log in")
-
-    expect(page).to(have_title(full_title(@user.name)))
-
-    display_login_menu
-
-    # セッションを閉じて開き直してもログイン状態が保持されていること
-    # puts page.methods.sort.join("\n") #.driver.browser.methods
-    page.quit
-    visit root_path
-    page.refresh
-    display_login_menu
   end
 end

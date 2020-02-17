@@ -134,14 +134,14 @@ RSpec.describe "Userモデルのテスト", type: :model do
       expect(user.remember_digest).to be_blank
     end
 
-    it "ahthenticated?メソッドで、記憶トークンが等しい場合はtrueを返すこと" do
+    it "authenticated?メソッドで、記憶トークンが等しい場合はtrueを返すこと" do
       @user.save
       @user.remember
 
       expect(@user.authenticated?(:remember, @user.remember_token)).to be_truthy
     end
 
-    it "ahthenticated?メソッドで、記憶トークンが異なる場合はfalseを返すこと" do
+    it "authenticated?メソッドで、記憶トークンが異なる場合はfalseを返すこと" do
       @user.save
       @user.remember
 
@@ -177,19 +177,58 @@ RSpec.describe "Userモデルのテスト", type: :model do
       expect(ActionMailer::Base.deliveries.size).to eq 1
     end
 
-    it "create_activation_digestメソッドで、有効化トークンと有効化ダイジェストが期待通りであること" do
+    it "create_activation_digestメソッドで、有効化トークン・ダイジェストが期待通りであること" do
       # 保存前は有効化トークンと有効化ダイジェストはnilであること
       expect(@user.activation_token).to be_blank
       expect(@user.activation_digest).to be_blank
 
       @user.save
 
-      # 保存後は有効化ダイジェストに値が設定されていること
+      # 保存後はトークンとダイジェストに値が設定されていること
       expect(@user.activation_token).not_to be_blank
       expect(@user.activation_digest).not_to be_blank
 
-      # 有効化トークンと有効化ダイジェストが一致すること
+      # トークンとダイジェストが一致すること
       expect(@user.authenticated?(:activation, @user.activation_token)).to be_truthy
+    end
+
+    it "create_reset_digestメソッドで、パスワード再設定用トークン・ダイジェストが期待通りであること" do
+      @user.save
+
+      # 保存前は有効化トークンと有効化ダイジェストはnilであること
+      expect(@user.reset_token).to be_blank
+      expect(@user.reset_digest).to be_blank
+
+      @user.create_reset_digest
+
+      # 保存後はトークンとダイジェストに値が設定されていること
+      # DBに保存されていることを期待するためreloadする
+      @user.reload
+      expect(@user.reset_token).not_to be_blank
+      expect(@user.reset_digest).not_to be_blank
+
+      # トークンとダイジェストが一致すること
+      expect(@user.authenticated?(:reset, @user.reset_token)).to be_truthy
+    end
+
+    it "password_reset_expired?メソッドで、reset_sent_atの日時から2時間経過していたら
+      期限切れとみなすこと" do
+      # パスワード再設定ダイジェストとトークンを発行する
+      @user.create_reset_digest
+      @user.save
+
+      @user.reset_sent_at = @user.reset_sent_at.ago(2.hours)
+      expect(@user.password_reset_expired?).to be_truthy
+    end
+
+    it "password_reset_expired?メソッドで、reset_sent_atの日時から1時間59分経過していたら
+      期限切れと【みなさない】こと" do
+      # パスワード再設定ダイジェストとトークンを発行する
+      @user.create_reset_digest
+      @user.save
+
+      @user.reset_sent_at = @user.reset_sent_at.ago(1.hours).ago(59.minutes)
+      expect(@user.password_reset_expired?).to be_falsey
     end
   end
 end

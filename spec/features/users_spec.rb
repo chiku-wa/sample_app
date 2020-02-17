@@ -70,6 +70,6 @@ RSpec.feature "Users", type: :feature do
     expect(page).to(have_title(full_title("Log in"), exact: true))
 
     # エラーメッセージが表示されること
-    expect(page).to(have_selector(".alert.alert-danger", text: "Please log in."))
+    expect(page).to have_selector(".alert.alert-danger", text: "Please log in.")
   end
 end
