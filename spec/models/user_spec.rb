@@ -11,26 +11,53 @@ RSpec.describe "Userモデルのテスト", type: :model do
     )
   end
 
-  context "事前確認用テスト" do
-    it "ユーザ情報が有効であること" do
+  context "テストデータの事前確認用テスト" do
+    it "テストデータを加工していない場合はバリデーションを通過すること" do
       expect(@user).to be_valid
     end
   end
 
   context "バリデーションのテスト" do
     # --- nameのテスト
-    it "nameが空白の場合はバリデーションエラーとなること" do
+    it "nameがスペース、空文字のみの場合はバリデーションエラーとなること" do
+      # 半角スペース
+      @user.name = " "
+      expect(@user).not_to be_valid
+
+      # 全角スペース
+      @user.name = "　"
+      expect(@user).not_to be_valid
+
+      # 空文字
       @user.name = ""
       expect(@user).not_to be_valid
     end
 
-    it "nameが規定の最大文字数を超えている場合はバリデーションエラーとなること" do
+    it "nameが規定の最大文字数(全角、半角区別なし)を超えている場合はバリデーションエラーとなること" do
+      # 半角51文字はバリデーションエラーとなること
       @user.name = "a" * 51
+      expect(@user).not_to be_valid
+
+      # 全角50文字は許容されること(バイトが判断基準になっていないこと)
+      @user.name = "あ" * 50
+      expect(@user).to be_valid
+
+      # 全角51文字はバリデーションエラーとなること
+      @user.name = "あ" * 51
       expect(@user).not_to be_valid
     end
 
     # --- emailのテスト
     it "emailが空白の場合はバリデーションエラーとなること" do
+      # 半角スペース
+      @user.email = " "
+      expect(@user).not_to be_valid
+
+      # 全角スペース
+      @user.email = "　"
+      expect(@user).not_to be_valid
+
+      # 空文字
       @user.email = ""
       expect(@user).not_to be_valid
     end
