@@ -11,9 +11,7 @@ RSpec.describe "Userモデルのテスト", type: :model do
     user.save
 
     # テストデータ
-    # ★★この書き方は正しくないので、後々修正する！
-    @micropost = Micropost.new(
-      user_id: user.id,
+    @micropost = user.microposts.build(
       content: "Test message.",
     )
   end
@@ -25,9 +23,9 @@ RSpec.describe "Userモデルのテスト", type: :model do
   end
 
   context "バリデーションのテスト" do
-    # --- user_idのテスト
-    it "user_idがnilの場合はバリデーションエラーとなること" do
-      @micropost.user_id = nil
+    # --- userのテスト
+    it "userがnilの場合はバリデーションエラーとなること" do
+      @micropost.user = nil
       expect(@micropost).not_to be_valid
     end
 

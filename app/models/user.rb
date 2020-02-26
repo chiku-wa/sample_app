@@ -1,8 +1,15 @@
 class User < ApplicationRecord
+  # === Setter,Getter
   attr_accessor :remember_token, :activation_token, :reset_token
+
+  # === フィルタリング
   before_save :down_email
   before_create :create_activation_digest
 
+  # === 従属関係
+  has_many :microposts
+
+  # === バリデーション
   validates(
     :name,
     {
@@ -32,6 +39,7 @@ class User < ApplicationRecord
     },
   )
 
+  # === メソッド
   # 引数の文字列のハッシュを返す
   class << self
     def digest(string)
