@@ -4,13 +4,12 @@ RSpec.describe "Userモデルのテスト", type: :model do
   before do
     user = User.new(
       name: "Tom",
-      email: "Tom@example.com",
+      email: "cacy@example.com",
       password: "foobar",
       password_confirmation: "foobar",
     )
     user.save
 
-    # テストデータ
     @micropost = user.microposts.build(
       content: "Test message.",
     )

@@ -119,7 +119,7 @@ RSpec.describe "Userモデルのテスト", type: :model do
     end
   end
 
-  context "バリデーション以外のテスト" do
+  context "その他のテスト" do
     it "emailが小文字に変換されて登録されること" do
       mixed_case_email = "Tom@example.com"
       @user.email = mixed_case_email
