@@ -7,7 +7,7 @@ class User < ApplicationRecord
   before_create :create_activation_digest
 
   # === 従属関係
-  has_many :microposts
+  has_many(:microposts, dependent: :destroy)
 
   # === バリデーション
   validates(

@@ -119,6 +119,27 @@ RSpec.describe "Userモデルのテスト", type: :model do
     end
   end
 
+  context "マイクロポスト関連のテスト" do
+    it "ユーザが削除された場合、関連するマイクロソフトが削除されること" do
+      # マイクロソフトテスト用データ作成
+      micropost_latest = FactoryBot.build(:micropost_latest)
+      @user.microposts.build(
+        content: micropost_latest.content,
+        created_at: micropost_latest.created_at,
+      )
+      @user.save
+
+      # 削除する前はマイクロポストが存在すること
+      expect(@user.microposts.size).to eq 1
+
+      # 破壊的メソッドを使って、テスト失敗時に例外を発生させて原因が特定できるようにする
+      @user.destroy!
+
+      # ユーザ削除後はマイクロソフトが削除されていること
+      expect(@user.microposts.size).to eq 0
+    end
+  end
+
   context "その他のテスト" do
     it "emailが小文字に変換されて登録されること" do
       mixed_case_email = "Tom@example.com"
