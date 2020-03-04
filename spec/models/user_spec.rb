@@ -120,8 +120,8 @@ RSpec.describe "Userモデルのテスト", type: :model do
   end
 
   context "マイクロポスト関連のテスト" do
-    it "ユーザが削除された場合、関連するマイクロソフトが削除されること" do
-      # マイクロソフトテスト用データ作成
+    it "ユーザが削除された場合、関連するマイクロポストが削除されること" do
+      # マイクロポストデータ作成
       micropost_latest = FactoryBot.build(:micropost_latest)
       @user.microposts.build(
         content: micropost_latest.content,
@@ -135,7 +135,7 @@ RSpec.describe "Userモデルのテスト", type: :model do
       # 破壊的メソッドを使って、テスト失敗時に例外を発生させて原因が特定できるようにする
       @user.destroy!
 
-      # ユーザ削除後はマイクロソフトが削除されていること
+      # ユーザ削除後はマイクロポストが削除されていること
       expect(@user.microposts.size).to eq 0
     end
   end
