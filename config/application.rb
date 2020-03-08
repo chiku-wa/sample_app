@@ -38,5 +38,8 @@ module SampleApp
 
     # DBに登録するときのタイムゾーン
     config.active_record.default_timezone = :local
+
+    # デフォルトの言語を日本語にする
+    config.i18n.default_locale = :ja
   end
 end
