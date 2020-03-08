@@ -85,6 +85,7 @@ RSpec.describe "UsersController-requests", type: :request do
       get users_path, params: { page: 1 }
       assert_template "users/index"
       expect(assigns[:users].size).to eq expect_number_of_one
+
       # ページ指定無しの場合は1ページ目を指定した場合と結果が同じであること
       get users_path, params: { page: nil }
       assert_template "users/index"
@@ -131,14 +132,15 @@ RSpec.describe "UsersController-requests", type: :request do
     end
 
     it "マイクロポストが更新日時の新しい順に表示されていること" do
+      # ログイン処理
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
       follow_redirect!
       assert_template "users/show"
 
-      # マイクロポストを登録する
+      # テスト用のマイクロポストを登録する
+      # ソートが正常に機能されているか確認するために、レコードの作成日時が古い順に登録する
       [
-        # テストを正確にするため、レコードの作成日時が古い順に登録する
         FactoryBot.build(:micropost_3years_ago),
         FactoryBot.build(:micropost_2hours_ago),
         FactoryBot.build(:micropost_10min_ago),
@@ -164,6 +166,49 @@ RSpec.describe "UsersController-requests", type: :request do
       expect_fourth = FactoryBot.build(:micropost_3years_ago)
       expect(assigns[:microposts][3].content).to eq expect_fourth.content
       expect(assigns[:microposts][3].created_at).to eq expect_fourth.created_at
+    end
+
+    it "マイクロポスト一覧で、直接アクセス、Next、Previousが正常に機能すること" do
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      expect_number_of_one = @user.microposts.paginate(page: 1).each.size
+      # 1ページに移動しても想定通りの件数が表示されること
+      get user_path(@user), params: { page: 1 }
+      assert_template "users/show"
+      expect(assigns[:microposts].size).to eq expect_number_of_one
+
+      # ページ指定無しの場合は1ページ目を指定した場合と結果が同じであること
+      get user_path(@user), params: { page: nil }
+      assert_template "users/show"
+      expect(assigns[:microposts].size).to eq expect_number_of_one
+
+      expect_number_of_two = @user.microposts.paginate(page: 2).each.size
+      # 次のページに移動しても想定通りの件数であること
+      get user_path(@user), params: { page: 2 }
+      assert_template "users/show"
+      expect(assigns[:microposts].size).to eq expect_number_of_two
+    end
+
+    it "ログインしたユーザのマイクロポストのみが表示されていること" do
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # 前提として、比較用ユーザのマイクロポストが0件であること
+      expect(@user.microposts.size).to eq 0
+      expect(@user_second.microposts.size).to eq 0
+
+      # それぞれのユーザでマイクロポストを登録する
+      @user.microposts.build(content: "user message 1")
+      @user.microposts.build(content: "user message 2")
+      @user.save
+
+      @user_second.microposts.build(content: "user_second message 1")
+      @user.save
+
+      get user_path(@user), params: { page: nil }
+      assert_template "users/show"
+
+      # ユーザが保有するマイクロポストの件数と一致すること
+      expect(assigns[:microposts].size).to eq @user.microposts.size
     end
   end
 
