@@ -111,7 +111,7 @@ RSpec.describe "UsersController-requests", type: :request do
   end
 
   context "ユーザ参照(プロフィール)画面に関するテスト" do
-    it "ログインしたあとに自身のプロフィール画面を遷移すること" do
+    it "ログインしたあとに自身のプロフィール画面に遷移すること" do
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
       follow_redirect!
@@ -128,6 +128,42 @@ RSpec.describe "UsersController-requests", type: :request do
       get user_path(@user)
       follow_redirect!
       assert_template "static_pages/home"
+    end
+
+    it "マイクロポストが更新日時の新しい順に表示されていること" do
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      follow_redirect!
+      assert_template "users/show"
+
+      # マイクロポストを登録する
+      [
+        # テストを正確にするため、レコードの作成日時が古い順に登録する
+        FactoryBot.build(:micropost_3years_ago),
+        FactoryBot.build(:micropost_2hours_ago),
+        FactoryBot.build(:micropost_10min_ago),
+        FactoryBot.build(:micropost_latest),
+      ].each do |m|
+        @user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      @user.save
+
+      # 投稿日時の新しい順であることを確認する
+      expect_first = FactoryBot.build(:micropost_latest)
+      expect(assigns[:microposts][0].content).to eq expect_first.content
+      expect(assigns[:microposts][0].created_at).to eq expect_first.created_at
+
+      expect_second = FactoryBot.build(:micropost_10min_ago)
+      expect(assigns[:microposts][1].content).to eq expect_second.content
+      expect(assigns[:microposts][1].created_at).to eq expect_second.created_at
+
+      expect_third = FactoryBot.build(:micropost_2hours_ago)
+      expect(assigns[:microposts][2].content).to eq expect_third.content
+      expect(assigns[:microposts][2].created_at).to eq expect_third.created_at
+
+      expect_fourth = FactoryBot.build(:micropost_3years_ago)
+      expect(assigns[:microposts][3].content).to eq expect_fourth.content
+      expect(assigns[:microposts][3].created_at).to eq expect_fourth.created_at
     end
   end
 
