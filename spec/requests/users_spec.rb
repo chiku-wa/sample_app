@@ -14,7 +14,7 @@ RSpec.describe "UsersController-requests", type: :request do
     generate_test_users(100)
   end
 
-  context "未ログインユーザのアクセスが許可されていないページのテスト" do
+  context "未ログインユーザのアクセスが許可されていないアクションのテスト" do
     it "未ログインの場合にユーザ一覧を参照しようとした場合はログインページに遷移し、ログイン後はユーザ一覧画面に遷移すること" do
       get users_path
       follow_redirect!
@@ -68,7 +68,7 @@ RSpec.describe "UsersController-requests", type: :request do
     end
 
     it "ユーザを直接更新しようとした場合はログインページに遷移すること" do
-      patch user_path(@user), params: { user: params_update(@user) }
+      patch user_path(@user), params: { user: params_user_update(@user) }
       follow_redirect!
 
       expect(response).to(have_http_status("200"))
@@ -232,7 +232,7 @@ RSpec.describe "UsersController-requests", type: :request do
         password: modify_password,
         password_confirmation: modify_password,
       )
-      patch user_path(@user), params: { user: params_update(user_modify) }
+      patch user_path(@user), params: { user: params_user_update(user_modify) }
 
       # ユーザ情報が更新されていること
       user = User.find(@user.id)
@@ -265,7 +265,7 @@ RSpec.describe "UsersController-requests", type: :request do
         password: @user.password,
         password_confirmation: @user.password,
       )
-      patch user_path(@user), params: { user: params_update(user_modify) }
+      patch user_path(@user), params: { user: params_user_update(user_modify) }
 
       # ユーザ情報が更新されていないこと
       user = User.find(@user.id)
@@ -294,7 +294,7 @@ RSpec.describe "UsersController-requests", type: :request do
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
       # ユーザ2の更新画面に遷移するとTOP画面に遷移すること
-      patch user_path(@user_second), params: { user: params_update(@user) }
+      patch user_path(@user_second), params: { user: params_user_update(@user) }
 
       follow_redirect!
       expect(response).to(have_http_status("200"))
@@ -305,7 +305,7 @@ RSpec.describe "UsersController-requests", type: :request do
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
       # adminパラメータを追加してPATCHリクエストを送信する
-      invalid_parameter = params_update(@user)
+      invalid_parameter = params_user_update(@user)
       invalid_parameter[:admin] = true
       patch user_path(@user), params: { user: invalid_parameter }
 

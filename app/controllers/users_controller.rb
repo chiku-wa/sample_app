@@ -73,15 +73,6 @@ class UsersController < ApplicationController
     params.require(:user).permit(:name, :email, :password, :password_confirmation)
   end
 
-  # ユーザがログイン済みでない場合、ログイン画面に遷移させるメソッド
-  def logged_in_user
-    unless logged_in?
-      store_location
-      flash[:danger] = "Please log in."
-      redirect_to(login_path)
-    end
-  end
-
   # ログインユーザと異なるユーザに対するリクエストだった場合はTOP画面に遷移させるメソッド
   def correct_user
     @user = User.find(params[:id])
