@@ -63,7 +63,7 @@ RSpec.describe "MicropostsController-requests", type: :request do
     end
   end
 
-  context "マイクロポストの削除に関するテスト" do
+  pending "マイクロポストの削除に関するテスト" do
     it "正常に削除できること" do
       # 登録する
 
