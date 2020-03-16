@@ -23,7 +23,7 @@ RSpec.describe "UsersController-requests", type: :request do
       expect(response).to(have_http_status("200"))
       assert_template "sessions/new"
 
-      # ログインするとユーザ参照画面に遷移すること
+      # ログインするとユーザ一覧画面に遷移すること
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
       follow_redirect!
       assert_template "users/index"
