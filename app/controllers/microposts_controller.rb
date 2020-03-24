@@ -10,7 +10,9 @@ class MicropostsController < ApplicationController
     else
       # 保存に失敗した場合は、マイクロポスト投稿画面に遷移させる
       # ※root_urlを書き換えた場合に想定外の動きになるため、あえてコントローラ・アクションを明示する
-      render("static_pages/home")
+      flash[:danger] = "Micropost Failed!"
+      redirect_to(root_url)
+      # render("static_pages/home")
     end
   end
 
