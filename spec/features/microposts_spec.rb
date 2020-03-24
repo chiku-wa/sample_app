@@ -19,7 +19,7 @@ RSpec.feature "Microposts", type: :feature do
   end
 
   feature "投稿画面に関するテスト" do
-    scenario "ログイン時のみ、TOP画面に投稿画面が表示されていること" do
+    scenario "ログインしている間のみ、TOP画面に投稿画面が表示されていること" do
       # 投稿フォームを示すxpath
       xpath_post_form = "//textarea[@id='micropost_content']"
 
@@ -36,22 +36,54 @@ RSpec.feature "Microposts", type: :feature do
       logout_operation
       expect(page).to(have_xpath(xpath_post_form, count: 0))
     end
+
+    scenario "有効なマイクロポストを投稿する" do
+      login_operation(@user)
+
+      operation_post_micropost("a" * 140)
+
+      expect(page).to have_selector(
+        ".alert.alert-success",
+        text: "Micropost created!",
+      )
+    end
+
+    scenario "無効なマイクロポストを投稿する" do
+      login_operation(@user)
+
+      # 上限を超えた文字数を投稿する
+      operation_post_micropost("a" * 141)
+
+      # エラー数が出力されていること
+      expect(page).to(have_content(/The form contains 1 error*/))
+
+      expect(page).to(have_content("Content is too long (maximum is 140 characters)", count: 1))
+    end
   end
 
   scenario "投稿後は、マイクロポスト一覧の先頭に投稿内容が表示されていること" do
-    # 投稿画面を表示
     login_operation(@user)
-    visit root_path
 
     # 投稿内容を定義
     post_content = Faker::Lorem.sentence
 
-    # 投稿する
-    fill_in("micropost_content", with: post_content)
-    click_button("Post")
+    operation_post_micropost(post_content)
 
     # マイクロポスト一覧の先頭に表示されていること
     visit user_path(@user)
     expect(page.all("//li/span[@class='content']")[0]).to(have_content(post_content))
+  end
+
+  # ======================================
+  private
+
+  # マイクロポストを投稿する操作
+  def operation_post_micropost(post_content)
+    # 投稿画面を表示
+    visit root_path
+
+    # 投稿する
+    fill_in("micropost_content", with: post_content)
+    click_button("Post")
   end
 end
