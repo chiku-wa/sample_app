@@ -3,10 +3,9 @@ class MicropostsController < ApplicationController
 
   # マイクロポストを新規登録するアクション
   def create
-    current_user
     @micropost = current_user.microposts.build(micropost_params)
     if @micropost.save
-      flash[:info] = "Micropost created!"
+      flash[:success] = "Micropost created!"
       redirect_to(root_url)
     else
       # 保存に失敗した場合は、マイクロポスト投稿画面に遷移させる
