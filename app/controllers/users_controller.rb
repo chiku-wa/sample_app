@@ -33,6 +33,7 @@ class UsersController < ApplicationController
       flash[:info] = "Please check your email to activate your account."
       redirect_to(root_url)
     else
+      flash[:error] = @user.errors.full_messages
       render("new")
     end
   end
@@ -53,6 +54,7 @@ class UsersController < ApplicationController
       flash[:success] = "Profile updated"
       redirect_to(@user)
     else
+      flash[:error] = @user.errors.full_messages
       render("edit")
     end
   end

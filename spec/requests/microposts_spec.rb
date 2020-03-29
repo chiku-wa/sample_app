@@ -43,6 +43,34 @@ RSpec.describe "MicropostsController-requests", type: :request do
       expect(@user.microposts.size).to eq (size_before_update + 1)
     end
 
+    it "空文字の場合は値を登録できないこと" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      follow_redirect!
+      assert_template "users/show"
+
+      # マイクロポストが登録されないこと
+      micropost = Micropost.new(content: "")
+      expect {
+        post microposts_path, params: { micropost: params_micropost_update(micropost) }
+      }.to change(Micropost, :count).by(0)
+    end
+
+    it "文字数超過の場合は値を登録できないこと" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      follow_redirect!
+      assert_template "users/show"
+
+      # マイクロポストが登録されないこと
+      micropost = Micropost.new(content: "a" * 141)
+      expect {
+        post microposts_path, params: { micropost: params_micropost_update(micropost) }
+      }.to change(Micropost, :count).by(0)
+    end
+
     it "Content以外の要素をリクエストで更新できないこと" do
       # ログインする
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
@@ -60,14 +88,6 @@ RSpec.describe "MicropostsController-requests", type: :request do
 
       # 指定した作成日時でマイクロポストが登録されていないこと
       expect(Micropost.where(created_at: not_expect_created_at).size).to eq 0
-    end
-  end
-
-  pending "マイクロポストの削除に関するテスト" do
-    it "正常に削除できること" do
-      # 登録する
-
-      #
     end
   end
 

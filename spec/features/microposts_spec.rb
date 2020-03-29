@@ -1,6 +1,12 @@
 require "rails_helper"
 
 RSpec.feature "Microposts", type: :feature do
+  # 投稿フォームの有無を確認するためのxpath
+  let(:xpath_post_form) { "//textarea[@id='micropost_content']" }
+
+  # マイクロポスト一覧の有無を確認するためのxpath
+  let(:xpath_micropost_list) { "//ol[@class='microposts']" }
+
   before "テストユーザ登録" do
     # --- マイクロソフトの取得順序テスト用のデータ
     @user = FactoryBot.build(:user)
@@ -19,22 +25,33 @@ RSpec.feature "Microposts", type: :feature do
   end
 
   feature "投稿画面に関するテスト" do
-    scenario "ログインしている間のみ、TOP画面に投稿画面が表示されていること" do
-      # 投稿フォームを示すxpath
-      xpath_post_form = "//textarea[@id='micropost_content']"
-
-      # 未ログイン時は投稿画面が表示されないこと
+    scenario "ログインしている間のみ、TOP画面に投稿画面とマイクロポスト一覧が表示されていること" do
+      # 未ログイン時は投稿画面とマイクロポスト一覧が表示されないこと
       visit root_path
       expect(page).to(have_xpath(xpath_post_form, count: 0))
+      expect(page).to(have_xpath(xpath_micropost_list, count: 0))
 
-      # ログイン時は投稿画面が表示されていること
+      # ログイン時は投稿画面とマイクロポスト一覧が表示されていること
       login_operation(@user)
       visit root_path
       expect(page).to(have_xpath(xpath_post_form, count: 1))
+      expect(page).to(have_xpath(xpath_micropost_list, count: 1))
 
-      # ログアウト後は投稿画面が表示されないこと
+      # ログアウト後は投稿画面とマイクロポスト投稿一覧が表示されないこと
       logout_operation
       expect(page).to(have_xpath(xpath_post_form, count: 0))
+      expect(page).to(have_xpath(xpath_micropost_list, count: 0))
+    end
+
+    scenario "ログインしている間のみ、プロフィール画面にマイクロポスト一覧が表示されていること" do
+      # 未ログイン時はマイクロポスト一覧が表示されないこと
+      visit user_path(@user)
+      expect(page).to(have_xpath(xpath_micropost_list, count: 0))
+
+      # ログイン時はマイクロポスト一覧が表示されていること
+      login_operation(@user)
+      visit root_path
+      expect(page).to(have_xpath(xpath_micropost_list, count: 1))
     end
 
     scenario "有効なマイクロポストを投稿する" do
@@ -69,7 +86,11 @@ RSpec.feature "Microposts", type: :feature do
 
     operation_post_micropost(post_content)
 
-    # マイクロポスト一覧の先頭に表示されていること
+    # TOP画面のマイクロポスト一覧の先頭に表示されていること
+    expect(page).to(have_title(full_title))
+    expect(page.all("//li/span[@class='content']")[0]).to(have_content(post_content))
+
+    # ユーザプロフィールのマイクロポスト一覧の先頭に表示されていること
     visit user_path(@user)
     expect(page.all("//li/span[@class='content']")[0]).to(have_content(post_content))
   end

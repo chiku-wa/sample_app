@@ -11,8 +11,20 @@
   <%= render  "layouts/header" %>
   <div class="container">
     <div class="row">
+      <%
+        # 以下の理由により、明示したflashのみ表示する。
+        # ・flash[:error]はValidationなどのエラー表示のため、別のパーシャルで使用するため(2重表示を防ぐ)
+        # ・BootstrapのCSSに対応している文字列(alert-successなど)のみ許容するため
+        #   参考：https://getbootstrap.com/docs/4.0/components/alerts/
+      %>
+      <% if(
+        flash[:primary] || flash[:secondary] || flash[:success]||
+        flash[:danger] || flash[:warning] ||
+        flash[:info] || flash[:light] || flash[:dark]
+      )%>
       <% flash.each do |message_type, message| %>
       <%= content_tag(:div, message, class: "alert alert-#{message_type}") %>
+      <% end %>
       <% end %>
     </div>
     <%= yield %>
