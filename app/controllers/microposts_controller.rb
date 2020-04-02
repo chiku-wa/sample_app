@@ -22,7 +22,6 @@ class MicropostsController < ApplicationController
 
     # 直前まで見ていたページに遷移させる
     # 直前まで見ていたページが存在しない場合はTOP画面に遷移させる
-    # redirect_to(request.referrer || root_url)
     redirect_back(fallback_location: root_url)
   end
 
