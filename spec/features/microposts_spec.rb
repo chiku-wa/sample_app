@@ -96,25 +96,31 @@ RSpec.feature "Microposts", type: :feature do
 
       operation_post_micropost(post_content)
 
+      # 期待値確認用に、マイクロポストの本文をXPathとして定義
+      xpath_micropost_content = "//li/span[@class='content']"
+
       # TOP画面のマイクロポスト一覧の先頭に表示されていること
       expect(page).to(have_title(full_title))
-      expect(page.all("//li/span[@class='content']")[0]).to(have_content(post_content))
+      expect(page.all(xpath_micropost_content)[0]).to(have_content(post_content))
 
       # ユーザプロフィールのマイクロポスト一覧の先頭に表示されていること
       visit user_path(@user)
-      expect(page.all("//li/span[@class='content']")[0]).to(have_content(post_content))
+      expect(page.all(xpath_micropost_content)[0]).to(have_content(post_content))
     end
 
     scenario "マイクロポストが削除できること" do
       login_operation(@user)
 
+      # 期待値確認用に、マイクロポストの本文をXPathとして定義
+      xpath_micropost_content = "//li/span[@class='content']"
+
       # TOP画面からマイクロポストを削除すると、1件削除されていること
-      before_micropost_size = all(:xpath, "//li/span[@class='content']").size
+      before_micropost_size = all(:xpath, xpath_micropost_content).size
 
       visit root_url
       all(:xpath, "//li/span[@class='timestamp']/a[@data-method='delete']")[1].click
 
-      after_micropost_size = all(:xpath, "//li/span[@class='content']").size
+      after_micropost_size = all(:xpath, xpath_micropost_content).size
 
       expect(after_micropost_size).to eq (before_micropost_size - 1)
     end
@@ -122,14 +128,16 @@ RSpec.feature "Microposts", type: :feature do
     scenario "マイクロポスト削除後は、直前まで見ていた画面に遷移すること" do
       login_operation(@user)
 
+      xpath_delete_button = "//li/span[@class='timestamp']/a[@data-method='delete']"
+
       # TOP画面からマイクロポストを削除すると、削除後はTOP画面に遷移すること
       visit root_url
-      all(:xpath, "//li/span[@class='timestamp']/a[@data-method='delete']")[1].click
+      all(:xpath, xpath_delete_button)[1].click
       expect(page).to have_title(full_title)
 
       # プロフィール画面からマイクロポストを削除すると、削除後はプロフィール画面に遷移すること
       visit user_path(@user)
-      all(:xpath, "//li/span[@class='timestamp']/a[@data-method='delete']")[1].click
+      all(:xpath, xpath_delete_button)[1].click
       expect(page).to have_title(full_title(@user.name))
     end
   end
