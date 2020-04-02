@@ -91,6 +91,40 @@ RSpec.describe "MicropostsController-requests", type: :request do
     end
   end
 
+  context "マイクロポストを削除する機能のテスト" do
+    it "正常に削除できること" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # 削除対象のマイクロポストを取得する
+      expect_delete_micropost = Micropost.first
+
+      # マイクロポストを削除すると1件減っていること
+      expect {
+        delete micropost_path(expect_delete_micropost.id)
+      }.to change(Micropost, :count).by(-1)
+
+      # 想定したマイクロポストが削除できていること
+      expect(Micropost.find_by(id: expect_delete_micropost.id)).to be_nil
+    end
+
+    it "ユーザ自身が保有するマイクロポストしか削除できないこと" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # ログインしているユーザとは別のユーザでマイクロポストを投稿する
+      user_second = FactoryBot.build(:user_second)
+      user_second.microposts.build(content: Faker::Lorem.sentence)
+      user_second.save
+
+      # 別のユーザのマイクロポストは削除できず、TOP画面に遷移すること
+      expect {
+        delete micropost_path(user_second.microposts.first.id)
+      }.to change(Micropost, :count).by(0)
+      expect(response).to redirect_to(root_url)
+    end
+  end
+
   context "未ログインユーザのアクセスが許可されていないアクションのテスト" do
     it "未ログインの場合にマイクロポストを新規に登録しようとした場合はログインページに遷移すること" do
       micropost = Micropost.new(content: Faker::Lorem.sentence)

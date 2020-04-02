@@ -50,6 +50,17 @@ RSpec.feature "Microposts", type: :feature do
 
       # ログイン時はマイクロポスト一覧が表示されていること
       login_operation(@user)
+      visit user_path(@user)
+      expect(page).to(have_xpath(xpath_micropost_list, count: 1))
+    end
+
+    scenario "ログインしている間のみ、TOP画面にマイクロポスト一覧が表示されていること" do
+      # 未ログイン時はマイクロポスト一覧が表示されないこと
+      visit root_url
+      expect(page).to(have_xpath(xpath_micropost_list, count: 0))
+
+      # ログイン時はマイクロポスト一覧が表示されていること
+      login_operation(@user)
       visit root_path
       expect(page).to(have_xpath(xpath_micropost_list, count: 1))
     end
@@ -76,23 +87,51 @@ RSpec.feature "Microposts", type: :feature do
 
       expect(page).to(have_content("Content is too long (maximum is 140 characters)", count: 1))
     end
-  end
 
-  scenario "投稿後は、マイクロポスト一覧の先頭に投稿内容が表示されていること" do
-    login_operation(@user)
+    scenario "投稿後は、マイクロポスト一覧の先頭に投稿内容が表示されていること" do
+      login_operation(@user)
 
-    # 投稿内容を定義
-    post_content = Faker::Lorem.sentence
+      # 投稿内容を定義
+      post_content = Faker::Lorem.sentence
 
-    operation_post_micropost(post_content)
+      operation_post_micropost(post_content)
 
-    # TOP画面のマイクロポスト一覧の先頭に表示されていること
-    expect(page).to(have_title(full_title))
-    expect(page.all("//li/span[@class='content']")[0]).to(have_content(post_content))
+      # TOP画面のマイクロポスト一覧の先頭に表示されていること
+      expect(page).to(have_title(full_title))
+      expect(page.all("//li/span[@class='content']")[0]).to(have_content(post_content))
 
-    # ユーザプロフィールのマイクロポスト一覧の先頭に表示されていること
-    visit user_path(@user)
-    expect(page.all("//li/span[@class='content']")[0]).to(have_content(post_content))
+      # ユーザプロフィールのマイクロポスト一覧の先頭に表示されていること
+      visit user_path(@user)
+      expect(page.all("//li/span[@class='content']")[0]).to(have_content(post_content))
+    end
+
+    scenario "マイクロポストが削除できること" do
+      login_operation(@user)
+
+      # TOP画面からマイクロポストを削除すると、1件削除されていること
+      before_micropost_size = all(:xpath, "//li/span[@class='content']").size
+
+      visit root_url
+      all(:xpath, "//li/span[@class='timestamp']/a[@data-method='delete']")[1].click
+
+      after_micropost_size = all(:xpath, "//li/span[@class='content']").size
+
+      expect(after_micropost_size).to eq (before_micropost_size - 1)
+    end
+
+    scenario "マイクロポスト削除後は、直前まで見ていた画面に遷移すること" do
+      login_operation(@user)
+
+      # TOP画面からマイクロポストを削除すると、削除後はTOP画面に遷移すること
+      visit root_url
+      all(:xpath, "//li/span[@class='timestamp']/a[@data-method='delete']")[1].click
+      expect(page).to have_title(full_title)
+
+      # プロフィール画面からマイクロポストを削除すると、削除後はプロフィール画面に遷移すること
+      visit user_path(@user)
+      all(:xpath, "//li/span[@class='timestamp']/a[@data-method='delete']")[1].click
+      expect(page).to have_title(full_title(@user.name))
+    end
   end
 
   # ======================================

@@ -15,7 +15,7 @@ FactoryBot.define do
     activated { false }
   end
 
-  # 別セッション用のテストで使用するユーザ
+  # 2人目のテストユーザ
   factory :user_second, class: User do
     name { "Yamada Tarou" }
     email { "yamada.tarou@example.com" }
