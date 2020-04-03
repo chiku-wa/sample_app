@@ -23,8 +23,11 @@ RSpec.describe "Userモデルのテスト", type: :model do
 
   context "バリデーションのテスト" do
     # --- userのテスト
-    it "userがnilの場合はバリデーションエラーとなること" do
+    it "user,user_idがnilの場合はバリデーションエラーとなること" do
       @micropost.user = nil
+      expect(@micropost).not_to be_valid
+
+      @micropost.user_id = nil
       expect(@micropost).not_to be_valid
     end
 
