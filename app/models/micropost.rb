@@ -10,4 +10,10 @@ class Micropost < ApplicationRecord
       length: { maximum: 140 },
     },
   )
+  validates(
+    :user_id,
+    {
+      presence: true,
+    }
+  )
 end
