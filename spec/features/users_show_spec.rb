@@ -3,6 +3,7 @@ require "rails_helper"
 RSpec.feature "UsersShow", type: :feature do
   before "テストユーザ登録" do
     @user = FactoryBot.build(:user)
+    @user.save
 
     50.times do |i|
       content = "#{Faker::Lorem.sentence} #{i}"

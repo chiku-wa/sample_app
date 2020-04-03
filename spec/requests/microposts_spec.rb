@@ -114,6 +114,7 @@ RSpec.describe "MicropostsController-requests", type: :request do
 
       # ログインしているユーザとは別のユーザでマイクロポストを投稿する
       user_second = FactoryBot.build(:user_second)
+      user_second.save
       user_second.microposts.build(content: Faker::Lorem.sentence)
       user_second.save
 

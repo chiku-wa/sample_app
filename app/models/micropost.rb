@@ -10,6 +10,7 @@ class Micropost < ApplicationRecord
       length: { maximum: 140 },
     },
   )
+  # DBに保存されていないユーザの場合はマイクロポストが登録できないようにするためのバリデーション
   validates(
     :user_id,
     {
