@@ -30,7 +30,7 @@ class MicropostsController < ApplicationController
 
   # クライアントから不正なパラメータをリクエストされないように、指定できるパラメータを制限するためのメソッド
   def micropost_params
-    params.require(:micropost).permit(:content)
+    params.require(:micropost).permit(:content, :picture)
   end
 
   # リクエストしたマイクロポストが、現在ログインしているユーザが保有しているものかをチェックし、

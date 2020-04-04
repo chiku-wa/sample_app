@@ -27,6 +27,7 @@ module RequestMacros
   def params_micropost_update(micropost)
     {
       content: micropost.content,
+      picture: micropost.picture,
     }
   end
 end
