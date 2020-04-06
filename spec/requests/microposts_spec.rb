@@ -1,6 +1,14 @@
 require "rails_helper"
 
 RSpec.describe "MicropostsController-requests", type: :request do
+  # 画像が保存されるディレクトリ
+  let(:image_save_path) { File.join(Rails.root, "public/uploads/micropost/picture") }
+
+  # 画像アップロードテスト用共通変数
+  let(:image_file_name) { "sample.jpg" }
+  let(:image_path) { File.join(Rails.root, "spec/fixtures/#{image_file_name}") }
+  let(:image) { Rack::Test::UploadedFile.new(image_path) }
+
   before "テストユーザ登録" do
     # --- マイクロソフトの取得順序テスト用のデータ
     @user = FactoryBot.build(:user)
@@ -19,19 +27,16 @@ RSpec.describe "MicropostsController-requests", type: :request do
   end
 
   context "マイクロポストの新規登録に関するテスト" do
-    it "正常に登録できること" do
+    it "画像をアップロードせず、本文のみで正常に登録できること" do
       # ログインする
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
-
-      follow_redirect!
-      assert_template "users/show"
 
       size_before_update = @user.microposts.size
 
       # 登録するとマイクロポストが1件登録されていること
-      micropost = Micropost.new(content: Faker::Lorem.sentence)
+      micropost_map = { content: Faker::Lorem.sentence }
       expect {
-        post microposts_path, params: { micropost: params_micropost_update(micropost) }
+        post microposts_path, params: { micropost: micropost_map }
       }.to change(Micropost, :count).by(1)
 
       # TOP画面に遷移すること
@@ -43,6 +48,41 @@ RSpec.describe "MicropostsController-requests", type: :request do
       expect(@user.microposts.size).to eq (size_before_update + 1)
     end
 
+    it "画像付きで正常に登録できること" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      size_before_update = @user.microposts.size
+
+      # 画像を設定する
+
+      micropost_map = {
+        content: Faker::Lorem.sentence,
+        picture: image,
+      }
+      expect {
+        post microposts_path, params: { micropost: micropost_map }
+      }.to change(Micropost, :count).by(1)
+
+      # TOP画面に遷移すること
+      follow_redirect!
+      assert_template "static_pages/home"
+
+      # ユーザに紐づくマイクロポストが登録されていること
+      @user.reload
+      expect(@user.microposts.size).to eq (size_before_update + 1)
+
+      # 画像がアップロードされていること
+      posted_micropost = @user.microposts.find_by(picture: image_file_name)
+      expect(posted_micropost).not_to be_nil
+      expect(
+        File.exist?("#{image_save_path}/#{posted_micropost.id}/#{image_file_name}")
+      ).to be_truthy
+    end
+
+    it "画像あり、本文なしの場合はアップロードできないこと" do
+    end
+
     it "空文字の場合は値を登録できないこと" do
       # ログインする
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
@@ -51,9 +91,9 @@ RSpec.describe "MicropostsController-requests", type: :request do
       assert_template "users/show"
 
       # マイクロポストが登録されないこと
-      micropost = Micropost.new(content: "")
+      micropost_map = { content: "" }
       expect {
-        post microposts_path, params: { micropost: params_micropost_update(micropost) }
+        post microposts_path, params: { micropost: micropost_map }
       }.to change(Micropost, :count).by(0)
     end
 
@@ -65,9 +105,9 @@ RSpec.describe "MicropostsController-requests", type: :request do
       assert_template "users/show"
 
       # マイクロポストが登録されないこと
-      micropost = Micropost.new(content: "a" * 141)
+      micropost_map = { content: "a" * 141 }
       expect {
-        post microposts_path, params: { micropost: params_micropost_update(micropost) }
+        post microposts_path, params: { micropost: micropost_map }
       }.to change(Micropost, :count).by(0)
     end
 
@@ -78,13 +118,12 @@ RSpec.describe "MicropostsController-requests", type: :request do
       follow_redirect!
       assert_template "users/show"
 
-      micropost = Micropost.new(content: Faker::Lorem.sentence)
-      request_micropost_params = params_micropost_update(micropost)
+      micropost_map = { content: Faker::Lorem.sentence }
 
       # 日付を明示して更新をリクエストする
       not_expect_created_at = Time.new(1990, 1, 1)
-      request_micropost_params[:created_at] = not_expect_created_at
-      post microposts_path, params: { micropost: request_micropost_params }
+      micropost_map[:created_at] = not_expect_created_at
+      post microposts_path, params: { micropost: micropost_map }
 
       # 指定した作成日時でマイクロポストが登録されていないこと
       expect(Micropost.where(created_at: not_expect_created_at).size).to eq 0
@@ -128,8 +167,8 @@ RSpec.describe "MicropostsController-requests", type: :request do
 
   context "未ログインユーザのアクセスが許可されていないアクションのテスト" do
     it "未ログインの場合にマイクロポストを新規に登録しようとした場合はログインページに遷移すること" do
-      micropost = Micropost.new(content: Faker::Lorem.sentence)
-      post microposts_path, params: { micropost: params_micropost_update(micropost) }
+      micropost_map = { content: Faker::Lorem.sentence }
+      post microposts_path, params: { micropost: micropost_map }
       follow_redirect!
 
       expect(response).to(have_http_status("200"))

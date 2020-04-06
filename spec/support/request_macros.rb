@@ -22,12 +22,4 @@ module RequestMacros
       password_confirmation: user.password_confirmation,
     }
   end
-
-  # マイクロポスト更新用のマイクロポストハッシュを返す
-  def params_micropost_update(micropost)
-    {
-      content: micropost.content,
-      picture: micropost.picture,
-    }
-  end
 end

@@ -1,6 +1,9 @@
 require "rails_helper"
 
 RSpec.describe "Userモデルのテスト", type: :model do
+  # アップロードした画像が保存されるディレクトリの定義(Publicディレクトリからの相対パス)
+  let(:image_save_dir) { "/uploads/micropost/picture" }
+
   before do
     user = User.new(
       name: "Tom",
@@ -58,6 +61,24 @@ RSpec.describe "Userモデルのテスト", type: :model do
       # 空文字
       @micropost.content = ""
       expect(@micropost).not_to be_valid
+    end
+  end
+
+  context "その他のテスト" do
+    it "画像を保存できること" do
+      # テスト用の画像変数を定義
+      image_file_name = "sample.jpg"
+      image_path = File.join(Rails.root, "spec/fixtures/#{image_file_name}")
+      image = Rack::Test::UploadedFile.new(image_path)
+
+      # バリデーションエラーが発生していないこと
+      @micropost.picture = image
+      @micropost.save
+      expect(@micropost).to be_valid
+
+      # 画像が保存されていること
+      @micropost.reload
+      expect(@micropost.picture.to_s).to eq "#{image_save_dir}/#{@micropost.id}/#{image_file_name}"
     end
   end
 end
