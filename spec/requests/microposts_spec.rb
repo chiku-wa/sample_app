@@ -4,10 +4,13 @@ RSpec.describe "MicropostsController-requests", type: :request do
   # 画像が保存されるディレクトリ
   let(:image_save_path) { File.join(Rails.root, "public/uploads/micropost/picture") }
 
-  # 画像アップロードテスト用共通変数
-  let(:image_file_name) { "sample.jpg" }
-  let(:image_path) { File.join(Rails.root, "spec/fixtures/#{image_file_name}") }
-  let(:image) { Rack::Test::UploadedFile.new(image_path) }
+  # ===== 予め用意したテスト用画像の情報を定義
+  # ディレクトリ
+  let(:test_image_path) { File.join(Rails.root, "spec/fixtures") }
+  # 正常系テスト用の画像ファイル名を定義
+  let(:jpg_file_name) { "sample.jpg" }
+  # 異常系テスト用の画像ファイル名を定義
+  let(:bmp_file_name) { "sample.bmp" }
 
   before "テストユーザ登録" do
     # --- マイクロソフトの取得順序テスト用のデータ
@@ -48,14 +51,14 @@ RSpec.describe "MicropostsController-requests", type: :request do
       expect(@user.microposts.size).to eq (size_before_update + 1)
     end
 
-    it "画像付きで正常に登録できること" do
+    it "許可されている拡張子の画像のみ正常にアップロードできること" do
       # ログインする
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
       size_before_update = @user.microposts.size
 
-      # 画像を設定する
-
+      # 画像つきでマイクロポストを投稿する
+      image = Rack::Test::UploadedFile.new("#{test_image_path}/#{jpg_file_name}")
       micropost_map = {
         content: Faker::Lorem.sentence,
         picture: image,
@@ -73,14 +76,41 @@ RSpec.describe "MicropostsController-requests", type: :request do
       expect(@user.microposts.size).to eq (size_before_update + 1)
 
       # 画像がアップロードされていること
-      posted_micropost = @user.microposts.find_by(picture: image_file_name)
+      posted_micropost = @user.microposts.find_by(picture: jpg_file_name)
+
       expect(posted_micropost).not_to be_nil
       expect(
-        File.exist?("#{image_save_path}/#{posted_micropost.id}/#{image_file_name}")
+        File.exist?("#{image_save_path}/#{posted_micropost.id}/#{jpg_file_name}")
       ).to be_truthy
     end
 
+    it "許可されていない拡張子のファイルの場合は投稿できないこと" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # 画像つきでマイクロポストを投稿する
+      image = Rack::Test::UploadedFile.new("#{test_image_path}/#{bmp_file_name}")
+      micropost_map = {
+        content: Faker::Lorem.sentence,
+        picture: image,
+      }
+      expect {
+        post microposts_path, params: { micropost: micropost_map }
+      }.to change(Micropost, :count).by(0)
+    end
+
     it "画像あり、本文なしの場合はアップロードできないこと" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # 画像のみでマイクロポストを投稿する
+      image = Rack::Test::UploadedFile.new("#{test_image_path}/#{jpg_file_name}")
+      micropost_map = {
+        picture: image,
+      }
+      expect {
+        post microposts_path, params: { micropost: micropost_map }
+      }.to change(Micropost, :count).by(0)
     end
 
     it "空文字の場合は値を登録できないこと" do
