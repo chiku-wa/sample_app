@@ -153,7 +153,7 @@ RSpec.feature "Microposts", type: :feature do
       expect(page.all(xpath_micropost_image)).not_to(have_content(over_size_file_name))
 
       # 失敗メッセージが表示されること
-      expect_failed_message(["Picture should be less than 5MB"])
+      expect_failed_message(["Maximum file size is 5MB. Please choose a smaller file."])
 
       # ===== 5MB未満のファイルはアップロードできること
       expect {

@@ -31,7 +31,7 @@ class Micropost < ApplicationRecord
   # ファイルサイズが許容しているサイズを上回っている場合はエラーとするバリデーション
   def picture_size
     if picture.size > 5.megabytes
-      errors.add(:picture, "should be less than 5MB")
+      errors.add(:picture, :file_size_larger_than)
     end
   end
 end
