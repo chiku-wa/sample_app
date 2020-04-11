@@ -9,9 +9,11 @@ RSpec.describe "Userモデルのテスト", type: :model do
   let(:jpeg_file_name) { "sample.jpeg" }
   let(:png_file_name) { "sample.png" }
   let(:gif_file_name) { "sample.gif" }
+  let(:boundary_size_file_name) { "boundary_size.jpg" }
   # 異常系テスト用の画像ファイル名を定義
   let(:bmp_file_name) { "sample.bmp" }
   let(:txt_file_name) { "sample.txt" }
+  let(:over_size_file_name) { "over_size.jpg" }
 
   # アップロードした画像が保存されるディレクトリの定義(Publicディレクトリからの相対パス)
   let(:image_save_dir) { "/uploads/micropost/picture" }
@@ -111,6 +113,24 @@ RSpec.describe "Userモデルのテスト", type: :model do
         micropost.save
         expect(micropost).not_to be_valid
       end
+    end
+
+    it "アップロードされたファイルが5MBを超える場合はバリデーションエラーとなること" do
+      micropost = @user.microposts.build(content: "Image upload test.")
+
+      # 5MB未満の場合はバリデーションを通過すること
+      image = Rack::Test::UploadedFile.new(
+        "#{test_image_path}/#{boundary_size_file_name}"
+      )
+      micropost.picture = image
+      expect(micropost).to be_valid
+
+      # 5MBの場合はバリデーションエラーが発生すること
+      image = Rack::Test::UploadedFile.new(
+        "#{test_image_path}/#{over_size_file_name}"
+      )
+      micropost.picture = image
+      expect(micropost).not_to be_valid
     end
   end
 end
