@@ -117,8 +117,7 @@ RSpec.feature "PasswordResets", type: :feature do
 
       # パスワード再設定画面のまま、Validationのエラーメッセージが表示されること
       expect(page).to have_title(full_title("Reset password"))
-      expect(page).to have_selector(".alert.alert-danger", text: "The form contains 1 error")
-      expect(page).to have_text("Password can't be blank")
+      expect_failed_message(["Password can't be blank"])
     end
 
     scenario "パスワードが不正な場合は、Validationのエラーメッセージが表示されること" do
@@ -129,8 +128,7 @@ RSpec.feature "PasswordResets", type: :feature do
 
       # パスワード再設定画面のまま、Validationのエラーメッセージが表示されること
       expect(page).to have_title(full_title("Reset password"))
-      expect(page).to have_selector(".alert.alert-danger", text: "The form contains 1 error")
-      expect(page).to have_text("Password is too short (minimum is 6 characters)")
+      expect_failed_message(["Password is too short (minimum is 6 characters)"])
     end
   end
 

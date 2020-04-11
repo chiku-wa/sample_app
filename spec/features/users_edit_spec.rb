@@ -95,11 +95,10 @@ RSpec.feature "UsersEdit", type: :feature do
       }.to change(User, :count).by(0)
 
       # エラー数が出力されていること
-      expect(page).to(have_content(/The form contains [0-9]* error[s]*/))
-
-      # 入力項目のエラーが出力されていること
-      expect(page).to(have_content("Email is invalid", count: 1))
-      expect(page).to(have_content("Name is too long", count: 1))
+      expect_failed_message([
+        "Email is invalid",
+        "Name is too long",
+      ])
     end
   end
 

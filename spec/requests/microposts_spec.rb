@@ -9,8 +9,10 @@ RSpec.describe "MicropostsController-requests", type: :request do
   let(:test_image_path) { File.join(Rails.root, "spec/fixtures") }
   # 正常系テスト用の画像ファイル名を定義
   let(:jpg_file_name) { "sample.jpg" }
+  let(:boundary_size_file_name) { "boundary_size.jpg" }
   # 異常系テスト用の画像ファイル名を定義
   let(:bmp_file_name) { "sample.bmp" }
+  let(:over_size_file_name) { "over_size.jpg" }
 
   before "テストユーザ登録" do
     # --- マイクロソフトの取得順序テスト用のデータ
@@ -90,6 +92,43 @@ RSpec.describe "MicropostsController-requests", type: :request do
 
       # 画像つきでマイクロポストを投稿する
       image = Rack::Test::UploadedFile.new("#{test_image_path}/#{bmp_file_name}")
+      micropost_map = {
+        content: Faker::Lorem.sentence,
+        picture: image,
+      }
+      expect {
+        post microposts_path, params: { micropost: micropost_map }
+      }.to change(Micropost, :count).by(0)
+    end
+
+    it "5MB以下のファイルのみアップロードできること" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # ===== 5MBの画像をアップロードすると投稿に成功すること
+      # 画像がアップロードされていること
+      image = Rack::Test::UploadedFile.new(
+        "#{test_image_path}/#{boundary_size_file_name}"
+      )
+      micropost_map = {
+        content: Faker::Lorem.sentence,
+        picture: image,
+      }
+      expect {
+        post microposts_path, params: { micropost: micropost_map }
+      }.to change(Micropost, :count).by(1)
+
+      posted_micropost = @user.microposts.find_by(picture: boundary_size_file_name)
+
+      expect(posted_micropost).not_to be_nil
+      expect(
+        File.exist?("#{image_save_path}/#{posted_micropost.id}/#{jpg_file_name}")
+      ).to be_truthy
+
+      # ===== 5MBを超える画像の場合は投稿できないこと
+      image = Rack::Test::UploadedFile.new(
+        "#{test_image_path}/#{over_size_file_name}"
+      )
       micropost_map = {
         content: Faker::Lorem.sentence,
         picture: image,

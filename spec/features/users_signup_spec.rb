@@ -48,13 +48,12 @@ RSpec.feature "UsersSignup", type: :feature do
       expect(page).to have_title(full_title("Sign up"))
 
       # エラー数が出力されていること
-      expect(page).to(have_content(/The form contains [0-9]* error[s]*/))
-
-      # 入力項目のエラーが出力されていること
-      expect(page).to(have_content("Name can't be blank", count: 1))
-      expect(page).to(have_content("Email is invalid", count: 1))
-      expect(page).to(have_content("Password confirmation doesn't match Password", count: 1))
-      expect(page).to(have_content("Password is too short (minimum is 6 characters)", count: 1))
+      expect_failed_message([
+        "Name can't be blank",
+        "Email is invalid",
+        "Password confirmation doesn't match Password",
+        "Password is too short (minimum is 6 characters)",
+      ])
     end
 
     scenario "すべての項目が空" do
@@ -78,13 +77,12 @@ RSpec.feature "UsersSignup", type: :feature do
       expect(page).to have_title(full_title("Sign up"))
 
       # エラー数が出力されていること
-      expect(page).to(have_content(/The form contains [0-9]* error[s]*/))
-
-      # 入力項目のエラーが出力されていること
-      expect(page).to(have_content("Name can't be blank", count: 1))
-      expect(page).to(have_content("Email can't be blank", count: 1))
-      expect(page).to(have_content("Email is invalid", count: 1))
-      expect(page).to(have_content("Password can't be blank", count: 1))
+      expect_failed_message([
+        "Name can't be blank",
+        "Email can't be blank",
+        "Email is invalid",
+        "Password can't be blank",
+      ])
     end
   end
 end

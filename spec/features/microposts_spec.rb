@@ -15,8 +15,11 @@ RSpec.feature "Microposts", type: :feature do
   let(:test_image_path) { File.join(Rails.root, "spec/fixtures") }
   # 正常系テスト用の画像ファイル名を定義
   let(:jpg_file_name) { "sample.jpg" }
+  let(:boundary_size_file_name) { "boundary_size.jpg" }
+
   # 異常系テスト用の画像ファイル名を定義
   let(:bmp_file_name) { "sample.bmp" }
+  let(:over_size_file_name) { "over_size.jpg" }
 
   before "テストユーザ登録" do
     # --- マイクロソフトの取得順序テスト用のデータ
@@ -129,12 +132,45 @@ RSpec.feature "Microposts", type: :feature do
       expect(page.all(xpath_micropost_image)).not_to(have_content(bmp_file_name))
 
       # 失敗メッセージが表示されること
-      expect(page).to have_selector(
-        ".alert.alert-danger",
-        text: "The form contains 1 error",
+      expect_failed_message(
+        ['Picture You are not allowed to upload "bmp" files, allowed types: jpg, jpeg, gif, png']
       )
-      expect(page).to have_text(
-        'Picture You are not allowed to upload "bmp" files, allowed types: jpg, jpeg, gif, png',
+    end
+
+    scenario "ファイルサイズが5MB以内のファイルしかアップロードできないこと" do
+      login_operation(@user)
+
+      # ===== 5MBを超える場合はアップロードできないこと
+      expect {
+        operation_post_micropost(
+          "Image upload test.",
+          "#{test_image_path}/#{over_size_file_name}",
+        )
+      }.to change(Micropost, :count).by(0)
+
+      # マイクロポスト一覧img要素を持つマイクロポストが存在しないこと
+      expect(page).to(have_title(full_title))
+      expect(page.all(xpath_micropost_image)).not_to(have_content(over_size_file_name))
+
+      # 失敗メッセージが表示されること
+      expect_failed_message(["Picture should be less than 5MB"])
+
+      # ===== 5MB未満のファイルはアップロードできること
+      expect {
+        operation_post_micropost(
+          "Image upload test.",
+          "#{test_image_path}/#{boundary_size_file_name}",
+        )
+      }.to change(Micropost, :count).by(1)
+
+      # マイクロポスト一覧img要素を持つマイクロポストが存在しないこと
+      expect(page).to(have_title(full_title))
+      expect(page.all(xpath_micropost_image)).not_to(have_content(boundary_size_file_name))
+
+      # 成功メッセージが表示されること
+      expect(page).to have_selector(
+        ".alert.alert-success",
+        text: "Micropost created!",
       )
     end
 
@@ -147,9 +183,7 @@ RSpec.feature "Microposts", type: :feature do
       }.to change(Micropost, :count).by(0)
 
       # エラー数が出力されていること
-      expect(page).to(have_content(/The form contains 1 error*/))
-
-      expect(page).to(have_content("Content is too long (maximum is 140 characters)", count: 1))
+      expect_failed_message(["Content is too long (maximum is 140 characters)"])
     end
 
     scenario "正常に投稿できた後は、マイクロポスト一覧の先頭に投稿内容が表示されていること" do
@@ -210,7 +244,7 @@ RSpec.feature "Microposts", type: :feature do
   # ======================================
   private
 
-  # 本文のみでマイクロポストを投稿する操作
+  # 本文のみでマイクロポストを投稿するメソッド
   # 第2引数の画像がnilの場合は画像の添付は行わない
   def operation_post_micropost(post_content, image_path = nil)
     # 投稿画面を表示
@@ -225,5 +259,13 @@ RSpec.feature "Microposts", type: :feature do
 
     # 投稿する
     click_button("Post")
+  end
+
+  # マイクロポスト投稿の成功メッセージを期待するメソッド
+  def expect_success_message
+    expect(page).to have_selector(
+      ".alert.alert-success",
+      text: "Micropost created!",
+    )
   end
 end
