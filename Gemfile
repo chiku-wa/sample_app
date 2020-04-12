@@ -44,7 +44,6 @@ group :test do
   gem "guard-rspec"
   gem "spring-commands-rspec", "~> 1.0", ">= 1.0.4"
   gem "capybara", "~> 3.32"
-  gem "capybara-webkit", "~>1.15"
 end
 
 group :production do
