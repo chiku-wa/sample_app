@@ -40,10 +40,11 @@ group :test do
   gem "rails-controller-testing", "1.0.2"
   gem "minitest", "5.11.3"
   gem "minitest-reporters", "1.1.14"
-  gem "guard", "2.13.0"
+  gem "guard", "2.16.2"
   gem "guard-rspec"
   gem "spring-commands-rspec", "~> 1.0", ">= 1.0.4"
-  gem "capybara", "~> 3.29"
+  gem "capybara", "~> 3.32"
+  gem "capybara-webkit", "~>1.15"
 end
 
 group :production do
