@@ -20,18 +20,4 @@ class Micropost < ApplicationRecord
       presence: true,
     }
   )
-
-  # === カスタムバリデーション
-  validate(:picture_size)
-
-  # ======================================
-  private
-
-  # ===== カスタムバリデーション
-  # ファイルサイズが許容しているサイズを上回っている場合はエラーとするバリデーション
-  def picture_size
-    if picture.size > 5.megabytes
-      errors.add(:picture, :file_size_larger_than)
-    end
-  end
 end

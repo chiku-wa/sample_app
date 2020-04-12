@@ -137,7 +137,7 @@ RSpec.feature "Microposts", type: :feature do
       )
     end
 
-    scenario "ファイルサイズが5MB以内のファイルしかアップロードできないこと" do
+    scenario "ファイルサイズが5MB以下のファイルしかアップロードできないこと" do
       login_operation(@user)
 
       # ===== 5MBを超える場合はアップロードできないこと
@@ -153,7 +153,7 @@ RSpec.feature "Microposts", type: :feature do
       expect(page.all(xpath_micropost_image)).not_to(have_content(over_size_file_name))
 
       # 失敗メッセージが表示されること
-      expect_failed_message(["Maximum file size is 5MB. Please choose a smaller file."])
+      expect_failed_message(["Picture File size should be less than 5 MB"])
 
       # ===== 5MB未満のファイルはアップロードできること
       expect {

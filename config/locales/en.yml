@@ -1,8 +1,1 @@
 en:
-  activerecord:
-    errors:
-      models:
-        micropost:
-          attributes:
-            picture:
-              file_size_larger_than: Maximum file size is 5MB. Please choose a smaller file.

@@ -79,6 +79,3 @@ yarn-debug.log*
 
 # Macで生成されるシステムファイルは除外する
 .DS_Store
-
-# rbenvで生成されたRubyバージョンの設定ファイル
-.ruby-version
