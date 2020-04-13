@@ -19,6 +19,7 @@ gem "bootstrap-will_paginate", "~> 1.0"
 gem "activerecord-import", "~> 1.0"
 gem "carrierwave", "2.1.0"
 gem "mini_magick", "4.10.1"
+gem "fog", "2.2.0"
 
 group :development, :test do
   gem "sqlite3", "1.3.13"
