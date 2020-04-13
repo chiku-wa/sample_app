@@ -34,7 +34,7 @@ end
 User.import(users)
 
 # 一部のユーザのみ、マイクロポストを50件登録する
-users = User.order(creted_at: :asc).take(3)
+users = User.order(created_at: :asc).take(3)
 users.each do |u|
   50.times do |i|
     content = "#{Faker::Lorem.sentence} #{i}"
