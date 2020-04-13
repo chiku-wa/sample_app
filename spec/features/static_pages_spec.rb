@@ -77,7 +77,10 @@ RSpec.feature "StaticPages", type: :feature do
     login_operation(@user)
     display_login_menu
 
-    # ユーザ一覧画面に遷移すること
+    # 一旦、プロフィール画面以外に遷移する
+    click_link("Home")
+
+    # ユーザプロフィール画面に遷移すること
     click_link("Account")
     click_link("Profile")
     expect(page).to(have_title(@user.name))

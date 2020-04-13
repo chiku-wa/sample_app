@@ -1,0 +1,22 @@
+<%= form_with(model: @micropost, local: true) do |f| %>
+<%= render "shared/error_messages", {object: f.object} %>
+<div class="field">
+    <%= f.text_area(:content, placeholder:"Compose new micropost...") %>
+</div>
+<span class="picture">
+    <%= f.file_field(:picture, {accept: "image/jpeg, image/gif, image/png"}) %>
+</span>
+<%= f.submit("Post", class:"btn btn-primary") %>
+<% end %>
+
+<script type="text/javascript">
+    $('#micropost_picture').bind(
+        "change",
+        function() {
+            var size_in_megabytes = this.files[0].size
+            if (size_in_megabytes > parseInt('<%= 5. megabyte %>', 10)) {
+                alert('<%= t("errors.messages.max_size_error", max_size: "5MB") %>')
+            }
+        }
+    );
+</script>

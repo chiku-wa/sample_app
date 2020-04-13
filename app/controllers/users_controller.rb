@@ -8,9 +8,15 @@ class UsersController < ApplicationController
     @users = User.where(activated: true).paginate(page: params[:page])
   end
 
-  # ユーザプロフィール画面を表示するアクション
+  # ユーザプロフィールと、ユーザが投稿したマイクロポストを表示するアクション
   def show
     @user = User.find(params[:id])
+
+    # 最新順にマイクロポストを表示する
+    @microposts = @user.microposts
+      .order(created_at: :desc)
+      .paginate(page: params[:page])
+
     redirect_to(root_url) and return unless @user.activated
   end
 
@@ -27,6 +33,7 @@ class UsersController < ApplicationController
       flash[:info] = "Please check your email to activate your account."
       redirect_to(root_url)
     else
+      flash[:error] = @user.errors.full_messages
       render("new")
     end
   end
@@ -47,6 +54,7 @@ class UsersController < ApplicationController
       flash[:success] = "Profile updated"
       redirect_to(@user)
     else
+      flash[:error] = @user.errors.full_messages
       render("edit")
     end
   end
@@ -65,15 +73,6 @@ class UsersController < ApplicationController
   def user_params
     # permitメソッドの引数に渡した名称のパラメータしか指定できない
     params.require(:user).permit(:name, :email, :password, :password_confirmation)
-  end
-
-  # ユーザがログイン済みでない場合、ログイン画面に遷移させるメソッド
-  def logged_in_user
-    unless logged_in?
-      store_location
-      flash[:danger] = "Please log in."
-      redirect_to(login_path)
-    end
   end
 
   # ログインユーザと異なるユーザに対するリクエストだった場合はTOP画面に遷移させるメソッド

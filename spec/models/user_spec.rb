@@ -11,26 +11,53 @@ RSpec.describe "Userモデルのテスト", type: :model do
     )
   end
 
-  context "事前確認用テスト" do
-    it "ユーザ情報が有効であること" do
+  context "テストデータの事前確認用テスト" do
+    it "テストデータを加工していない場合はバリデーションを通過すること" do
       expect(@user).to be_valid
     end
   end
 
   context "バリデーションのテスト" do
     # --- nameのテスト
-    it "nameが空白の場合はバリデーションエラーとなること" do
+    it "nameがスペース、空文字のみの場合はバリデーションエラーとなること" do
+      # 半角スペース
+      @user.name = " "
+      expect(@user).not_to be_valid
+
+      # 全角スペース
+      @user.name = "　"
+      expect(@user).not_to be_valid
+
+      # 空文字
       @user.name = ""
       expect(@user).not_to be_valid
     end
 
-    it "nameが規定の最大文字数を超えている場合はバリデーションエラーとなること" do
+    it "nameが規定の最大文字数(全角、半角区別なし)を超えている場合はバリデーションエラーとなること" do
+      # 半角51文字はバリデーションエラーとなること
       @user.name = "a" * 51
+      expect(@user).not_to be_valid
+
+      # 全角50文字は許容されること(バイトが判断基準になっていないこと)
+      @user.name = "あ" * 50
+      expect(@user).to be_valid
+
+      # 全角51文字はバリデーションエラーとなること
+      @user.name = "あ" * 51
       expect(@user).not_to be_valid
     end
 
     # --- emailのテスト
     it "emailが空白の場合はバリデーションエラーとなること" do
+      # 半角スペース
+      @user.email = " "
+      expect(@user).not_to be_valid
+
+      # 全角スペース
+      @user.email = "　"
+      expect(@user).not_to be_valid
+
+      # 空文字
       @user.email = ""
       expect(@user).not_to be_valid
     end
@@ -92,7 +119,28 @@ RSpec.describe "Userモデルのテスト", type: :model do
     end
   end
 
-  context "バリデーション以外のテスト" do
+  context "マイクロポスト関連のテスト" do
+    it "ユーザが削除された場合、関連するマイクロポストが削除されること" do
+      # マイクロポストデータ作成
+      micropost_latest = FactoryBot.build(:micropost_latest)
+      @user.microposts.build(
+        content: micropost_latest.content,
+        created_at: micropost_latest.created_at,
+      )
+      @user.save
+
+      # 削除する前はマイクロポストが存在すること
+      expect(@user.microposts.size).to eq 1
+
+      # 破壊的メソッドを使って、テスト失敗時に例外を発生させて原因が特定できるようにする
+      @user.destroy!
+
+      # ユーザ削除後はマイクロポストが削除されていること
+      expect(@user.microposts.size).to eq 0
+    end
+  end
+
+  context "その他のテスト" do
     it "emailが小文字に変換されて登録されること" do
       mixed_case_email = "Tom@example.com"
       @user.email = mixed_case_email

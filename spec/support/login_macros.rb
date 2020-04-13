@@ -33,6 +33,12 @@ module LoginMacros
     click_button("Log in")
   end
 
+  # ログアウト操作を行うメソッド
+  def logout_operation
+    click_link("Account")
+    click_link("Log out")
+  end
+
   # ---
   # 期待値確認用メソッド
   #

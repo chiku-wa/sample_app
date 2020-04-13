@@ -14,7 +14,7 @@ RSpec.describe "UsersController-requests", type: :request do
     generate_test_users(100)
   end
 
-  context "未ログインユーザのアクセスが許可されていないページのテスト" do
+  context "未ログインユーザのアクセスが許可されていないアクションのテスト" do
     it "未ログインの場合にユーザ一覧を参照しようとした場合はログインページに遷移し、ログイン後はユーザ一覧画面に遷移すること" do
       get users_path
       follow_redirect!
@@ -23,7 +23,7 @@ RSpec.describe "UsersController-requests", type: :request do
       expect(response).to(have_http_status("200"))
       assert_template "sessions/new"
 
-      # ログインするとユーザ参照画面に遷移すること
+      # ログインするとユーザ一覧画面に遷移すること
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
       follow_redirect!
       assert_template "users/index"
@@ -68,7 +68,7 @@ RSpec.describe "UsersController-requests", type: :request do
     end
 
     it "ユーザを直接更新しようとした場合はログインページに遷移すること" do
-      patch user_path(@user), params: { user: params_update(@user) }
+      patch user_path(@user), params: { user: params_user_update(@user) }
       follow_redirect!
 
       expect(response).to(have_http_status("200"))
@@ -85,6 +85,7 @@ RSpec.describe "UsersController-requests", type: :request do
       get users_path, params: { page: 1 }
       assert_template "users/index"
       expect(assigns[:users].size).to eq expect_number_of_one
+
       # ページ指定無しの場合は1ページ目を指定した場合と結果が同じであること
       get users_path, params: { page: nil }
       assert_template "users/index"
@@ -111,7 +112,7 @@ RSpec.describe "UsersController-requests", type: :request do
   end
 
   context "ユーザ参照(プロフィール)画面に関するテスト" do
-    it "ログインしたあとに自身のプロフィール画面を遷移すること" do
+    it "ログインしたあとに自身のプロフィール画面に遷移すること" do
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
       follow_redirect!
@@ -128,6 +129,86 @@ RSpec.describe "UsersController-requests", type: :request do
       get user_path(@user)
       follow_redirect!
       assert_template "static_pages/home"
+    end
+
+    it "マイクロポストが更新日時の新しい順に表示されていること" do
+      # ログイン処理
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      follow_redirect!
+      assert_template "users/show"
+
+      # テスト用のマイクロポストを登録する
+      # ソートが正常に機能されているか確認するために、レコードの作成日時が古い順に登録する
+      [
+        FactoryBot.build(:micropost_3years_ago),
+        FactoryBot.build(:micropost_2hours_ago),
+        FactoryBot.build(:micropost_10min_ago),
+        FactoryBot.build(:micropost_latest),
+      ].each do |m|
+        @user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      @user.save
+
+      # 投稿日時の新しい順であることを確認する
+      expect_first = FactoryBot.build(:micropost_latest)
+      expect(assigns[:microposts][0].content).to eq expect_first.content
+      expect(assigns[:microposts][0].created_at).to eq expect_first.created_at
+
+      expect_second = FactoryBot.build(:micropost_10min_ago)
+      expect(assigns[:microposts][1].content).to eq expect_second.content
+      expect(assigns[:microposts][1].created_at).to eq expect_second.created_at
+
+      expect_third = FactoryBot.build(:micropost_2hours_ago)
+      expect(assigns[:microposts][2].content).to eq expect_third.content
+      expect(assigns[:microposts][2].created_at).to eq expect_third.created_at
+
+      expect_fourth = FactoryBot.build(:micropost_3years_ago)
+      expect(assigns[:microposts][3].content).to eq expect_fourth.content
+      expect(assigns[:microposts][3].created_at).to eq expect_fourth.created_at
+    end
+
+    it "マイクロポスト一覧で、直接アクセス、Next、Previousが正常に機能すること" do
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      expect_number_of_one = @user.microposts.paginate(page: 1).each.size
+      # 1ページに移動しても想定通りの件数が表示されること
+      get user_path(@user), params: { page: 1 }
+      assert_template "users/show"
+      expect(assigns[:microposts].size).to eq expect_number_of_one
+
+      # ページ指定無しの場合は1ページ目を指定した場合と結果が同じであること
+      get user_path(@user), params: { page: nil }
+      assert_template "users/show"
+      expect(assigns[:microposts].size).to eq expect_number_of_one
+
+      expect_number_of_two = @user.microposts.paginate(page: 2).each.size
+      # 次のページに移動しても想定通りの件数であること
+      get user_path(@user), params: { page: 2 }
+      assert_template "users/show"
+      expect(assigns[:microposts].size).to eq expect_number_of_two
+    end
+
+    it "ログインしたユーザのマイクロポストのみが表示されていること" do
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # 前提として、比較用ユーザのマイクロポストが0件であること
+      expect(@user.microposts.size).to eq 0
+      expect(@user_second.microposts.size).to eq 0
+
+      # それぞれのユーザでマイクロポストを登録する
+      @user.microposts.build(content: "user message 1")
+      @user.microposts.build(content: "user message 2")
+      @user.save
+
+      @user_second.microposts.build(content: "user_second message 1")
+      @user.save
+
+      get user_path(@user), params: { page: nil }
+      assert_template "users/show"
+
+      # ユーザが保有するマイクロポストの件数と一致すること
+      expect(assigns[:microposts].size).to eq @user.microposts.size
     end
   end
 
@@ -151,7 +232,7 @@ RSpec.describe "UsersController-requests", type: :request do
         password: modify_password,
         password_confirmation: modify_password,
       )
-      patch user_path(@user), params: { user: params_update(user_modify) }
+      patch user_path(@user), params: { user: params_user_update(user_modify) }
 
       # ユーザ情報が更新されていること
       user = User.find(@user.id)
@@ -184,7 +265,7 @@ RSpec.describe "UsersController-requests", type: :request do
         password: @user.password,
         password_confirmation: @user.password,
       )
-      patch user_path(@user), params: { user: params_update(user_modify) }
+      patch user_path(@user), params: { user: params_user_update(user_modify) }
 
       # ユーザ情報が更新されていないこと
       user = User.find(@user.id)
@@ -213,7 +294,7 @@ RSpec.describe "UsersController-requests", type: :request do
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
       # ユーザ2の更新画面に遷移するとTOP画面に遷移すること
-      patch user_path(@user_second), params: { user: params_update(@user) }
+      patch user_path(@user_second), params: { user: params_user_update(@user) }
 
       follow_redirect!
       expect(response).to(have_http_status("200"))
@@ -224,7 +305,7 @@ RSpec.describe "UsersController-requests", type: :request do
       post login_path, params: { sessions: params_login(@user, remember_me: true) }
 
       # adminパラメータを追加してPATCHリクエストを送信する
-      invalid_parameter = params_update(@user)
+      invalid_parameter = params_user_update(@user)
       invalid_parameter[:admin] = true
       patch user_path(@user), params: { user: invalid_parameter }
 

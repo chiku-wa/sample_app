@@ -1,8 +1,15 @@
 class User < ApplicationRecord
+  # === Setter,Getter
   attr_accessor :remember_token, :activation_token, :reset_token
+
+  # === フィルタリング
   before_save :down_email
   before_create :create_activation_digest
 
+  # === 従属関係
+  has_many(:microposts, dependent: :destroy)
+
+  # === バリデーション
   validates(
     :name,
     {
@@ -32,6 +39,7 @@ class User < ApplicationRecord
     },
   )
 
+  # === メソッド
   # 引数の文字列のハッシュを返す
   class << self
     def digest(string)
@@ -93,6 +101,11 @@ class User < ApplicationRecord
   def password_reset_expired?
     # 現在時刻より2時間以上過去なら猶予期間を過ぎているとみなす
     reset_sent_at < 2.hours.ago
+  end
+
+  # 指定したユーザのマイクロポストを取得する
+  def feed
+    Micropost.where(user_id: id)
   end
 
   # ======================================
