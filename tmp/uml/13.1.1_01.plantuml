@@ -1,0 +1,19 @@
+@startuml
+
+object User {
+  id
+  name
+  email
+  created_at
+  ...
+}
+
+object Micropost {
+  id
+  content
+  ...
+}
+
+User "1" -r-> "N" Micropost
+
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+
+entity User_follower {
+  user_id(follower_id) [PK]
+  --
+  name
+  email
+  ...
+}
+
+entity User_followed {
+  user_id(followed_id) [PK]
+  --
+  name
+  email
+  ...
+}
+
+entity FollowerFollowed {
+  # follower_id [FK]
+  # followed_id [FK]
+}
+
+User_follower --ri-o{ FollowerFollowed
+FollowerFollowed }o-ri-- User_followed
+
+@enduml
