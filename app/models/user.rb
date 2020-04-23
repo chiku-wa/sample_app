@@ -7,7 +7,20 @@ class User < ApplicationRecord
   before_create :create_activation_digest
 
   # === 従属関係
-  has_many(:microposts, dependent: :destroy)
+  # マイクロポスト
+  has_many(
+    :microposts,
+    { dependent: :destroy },
+  )
+  # フォロー、フォロワー
+  has_many(
+    :followeds,
+    {
+      class_name: "FollowerFollowed",
+      foreign_key: "follower_id",
+      dependent: :destroy,
+    },
+  )
 
   # === バリデーション
   validates(

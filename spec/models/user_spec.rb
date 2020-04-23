@@ -140,6 +140,86 @@ RSpec.describe "Userモデルのテスト", type: :model do
     end
   end
 
+  context "フォロー機能のテスト" do
+    it "指定したユーザをフォローできること" do
+      @user.save
+
+      # フォローするユーザを作成する
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォローする
+      @user.followeds.build(followed_id: followed_user.id)
+
+      # バリデーションを通過すること
+      expect(@user).to be_valid
+
+      # フォロー情報が登録されていること
+      expect {
+        @user.save
+      }.to change(FollowerFollowed, :count).by(1)
+
+      # 想定した件数、内容が登録されていること
+      follower_followeds = FollowerFollowed.where({
+        follower_id: @user.id,
+        followed_id: followed_user.id,
+      })
+      expect(follower_followeds.size).to eq 1
+    end
+
+    it "フォローもとのユーザが削除された場合はフォロー情報が削除されること" do
+      @user.save
+
+      # フォローするユーザを作成する
+      user_followed = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      user_followed.save
+
+      # フォローする
+      @user.followeds.build(followed_id: user_followed.id)
+      @user.save
+
+      # 削除されたユーザがフォロワーとなっているフォロー情報が削除されること
+      expect {
+        @user.destroy
+      }.to change(FollowerFollowed, :count).by(-1)
+
+      follower_followeds = FollowerFollowed.where({
+        follower_id: @user.id,
+      })
+      expect(follower_followeds.size).to eq 0
+    end
+
+    it "フォロー先のユーザが削除されてもフォロー情報が残ること" do
+      # フォローするユーザを作成する
+      user_followed = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      user_followed.save
+
+      # フォローする
+      @user.followeds.build(followed_id: user_followed.id)
+      @user.save
+
+      # フォローしているユーザを削除しても、フォロー情報は削除されないこと
+      expect {
+        user_followed.destroy
+      }.to change(FollowerFollowed, :count).by(0)
+    end
+  end
+
   context "その他のテスト" do
     it "emailが小文字に変換されて登録されること" do
       mixed_case_email = "Tom@example.com"
