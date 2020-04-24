@@ -70,7 +70,7 @@ FactoryBot.define do
 
   factory :followed_user_second, class: User do
     name { "amerla" }
-    email { "amelda@example.com" }
+    email { "amerla@example.com" }
     password { "foobar" }
     password_confirmation { "foobar" }
     admin { false }
