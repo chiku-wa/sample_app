@@ -13,6 +13,23 @@ RSpec.describe "FollowerFollowedモデルのテスト", type: :model do
 
   context "バリデーションのテスト" do
     # --- follower_id,followed_idのテスト
+    it "follower_id,followed_idのいずれかがnilの場合はエラーとなること" do
+      @follower_user.followeds.build(followed_id: @followed_user.id)
+      @follower_user.save
+      follower_followed = @follower_user.followeds.first
+
+      expect(follower_followed).to be_valid
+
+      # follower_idがnilの場合はバリデーションエラーとなること
+      follower_followed.follower_id = nil
+      expect(follower_followed).not_to be_valid
+
+      follower_followed.reload
+
+      # follwerd_idがnilの場合はバリデーションエラーとなること
+      follower_followed.followed_id = nil
+      expect(follower_followed).not_to be_valid
+    end
     it "同じfollower_id,followed_idの組み合わせを持つレコードの場合はバリデーションエラーとなること" do
       # バリエーションテストのためのユーザを登録
       follower_user_second = FactoryBot.build(:follower_user_second)
