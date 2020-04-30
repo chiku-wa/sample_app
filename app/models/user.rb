@@ -12,14 +12,22 @@ class User < ApplicationRecord
     :microposts,
     { dependent: :destroy },
   )
-  # フォロー、フォロワー
+  # 自身がフォローしているユーザの一覧を取得するための従属関係
   has_many(
-    :followeds,
+    :follower_followeds,
     {
       class_name: "FollowerFollowed",
       foreign_key: "follower_id",
       dependent: :destroy,
     },
+  )
+
+  has_many(
+    :following,
+    {
+      through: :follower_followeds,
+      source: :followed,
+    }
   )
 
   # === バリデーション
@@ -119,6 +127,21 @@ class User < ApplicationRecord
   # 指定したユーザのマイクロポストを取得する
   def feed
     Micropost.where(user_id: id)
+  end
+
+  # 対象ユーザをフォローする
+  def follow(other_user)
+    following << other_user
+  end
+
+  # 対象ユーザをフォロー解除する
+  def unfollow(other_user)
+    following.delete(other_user)
+  end
+
+  # 対象ユーザがフォローしているならtrueを、していないならfalseを返す
+  def following?(other_user)
+    following.include?(other_user)
   end
 
   # ======================================

@@ -1,6 +1,6 @@
 @startuml
 
-entity User_follower {
+entity user_follower {
   user_id(follower_id) [PK]
   --
   name
@@ -8,7 +8,7 @@ entity User_follower {
   ...
 }
 
-entity User_followed {
+entity user_followed {
   user_id(followed_id) [PK]
   --
   name
@@ -16,12 +16,12 @@ entity User_followed {
   ...
 }
 
-entity FollowerFollowed {
+entity follower_followeds {
   # follower_id [FK]
   # followed_id [FK]
 }
 
-User_follower --ri-o{ FollowerFollowed
-FollowerFollowed }o-ri-- User_followed
+user_follower --ri-o{ follower_followeds
+follower_followeds }o-ri-- user_followed
 
 @enduml

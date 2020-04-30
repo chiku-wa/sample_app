@@ -1,0 +1,25 @@
+@startuml
+
+entity project {
+  project_id [PK]
+  --
+  project_name
+  ...
+}
+
+entity categories {
+  category_id [PK]
+  --
+  category_name
+  ...
+}
+
+entity projects_categories {
+  # project_id [FK]
+  # category_id [FK]
+}
+
+project --ri-o{ projects_categories
+projects_categories }o-ri-- categories
+
+@enduml

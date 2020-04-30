@@ -153,15 +153,13 @@ RSpec.describe "Userモデルのテスト", type: :model do
       )
       followed_user.save
 
-      # フォローする
-      @user.followeds.build(followed_id: followed_user.id)
-
-      # バリデーションを通過すること
-      expect(@user).to be_valid
-
       # フォロー情報が登録されていること
       expect {
-        @user.save
+        # フォローする
+        @user.follow(followed_user)
+
+        # バリデーションを通過すること
+        expect(@user).to be_valid
       }.to change(FollowerFollowed, :count).by(1)
 
       # 想定した件数、内容が登録されていること
@@ -172,21 +170,68 @@ RSpec.describe "Userモデルのテスト", type: :model do
       expect(follower_followeds.size).to eq 1
     end
 
-    it "フォローもとのユーザが削除された場合はフォロー情報が削除されること" do
+    it "フォローしているユーザを確認できること" do
       @user.save
 
-      # フォローするユーザを作成する
-      user_followed = User.new(
+      followed_user = User.new(
         name: "Alice",
         email: "Alice@example.com",
         password: "foobar",
         password_confirmation: "foobar",
       )
-      user_followed.save
+      followed_user.save
+
+      followed_user_second = User.new(
+        name: "Bob",
+        email: "Bob@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user_second.save
 
       # フォローする
-      @user.followeds.build(followed_id: user_followed.id)
+      @user.follow(followed_user)
+      @user.follow(followed_user_second)
+
+      # フォローしているユーザが取得できること
+      expect(@user.following?(followed_user)).to be_truthy
+      expect(@user.following?(followed_user_second)).to be_truthy
+    end
+
+    it "フォローを解除できること" do
       @user.save
+
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォローする
+      @user.follow(followed_user)
+      expect(@user.following.size).to eq 1
+
+      # フォロー解除する
+      @user.unfollow(followed_user)
+      expect(@user.following.size).to eq 0
+    end
+
+    it "フォローもとのユーザが削除された場合はフォロー情報が削除されること" do
+      @user.save
+
+      # フォローするユーザを作成する
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォローする
+      @user.following << followed_user
 
       # 削除されたユーザがフォロワーとなっているフォロー情報が削除されること
       expect {
@@ -201,21 +246,20 @@ RSpec.describe "Userモデルのテスト", type: :model do
 
     it "フォロー先のユーザが削除されてもフォロー情報が残ること" do
       # フォローするユーザを作成する
-      user_followed = User.new(
+      followed_user = User.new(
         name: "Alice",
         email: "Alice@example.com",
         password: "foobar",
         password_confirmation: "foobar",
       )
-      user_followed.save
+      followed_user.save
 
       # フォローする
-      @user.followeds.build(followed_id: user_followed.id)
-      @user.save
+      @user.following << followed_user
 
       # フォローしているユーザを削除しても、フォロー情報は削除されないこと
       expect {
-        user_followed.destroy
+        followed_user.destroy
       }.to change(FollowerFollowed, :count).by(0)
     end
   end
