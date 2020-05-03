@@ -12,21 +12,38 @@ class User < ApplicationRecord
     :microposts,
     { dependent: :destroy },
   )
+
   # 自身がフォローしているユーザの一覧を取得するための従属関係
   has_many(
-    :follower_followeds,
+    :active_relationships,
     {
       class_name: "FollowerFollowed",
       foreign_key: "follower_id",
       dependent: :destroy,
     },
   )
-
   has_many(
     :following,
     {
-      through: :follower_followeds,
+      through: :active_relationships,
       source: :followed,
+    }
+  )
+
+  # 自身をフォローしているユーザ(フォロワー)の一覧を取得するための従属関係
+  has_many(
+    :passive_relationships,
+    {
+      class_name: "FollowerFollowed",
+      foreign_key: "followed_id",
+      dependent: :destroy,
+    }
+  )
+  has_many(
+    :followers,
+    {
+      through: :passive_relationships,
+      source: :follower,
     }
   )
 
