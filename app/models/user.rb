@@ -43,7 +43,6 @@ class User < ApplicationRecord
     :followers,
     {
       through: :passive_relationships,
-      source: :follower,
     }
   )
 
