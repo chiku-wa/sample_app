@@ -34,11 +34,21 @@ end
 User.import(users)
 
 # 一部のユーザのみ、マイクロポストを50件登録する
-users = User.order(created_at: :asc).take(3)
-users.each do |u|
+users_micropost = User.order(created_at: :asc).take(3)
+users_micropost.each do |u|
   50.times do |i|
     content = "#{Faker::Lorem.sentence} #{i}"
     u.microposts.build(content: content)
   end
   u.save
+end
+
+# フォローデータを登録する
+follower_users = User.order(created_at: :asc).take(3)
+following_users = User.order(created_at: :desc).take(10)
+
+follower_users.each do |follower_user|
+  following_users.each do |following_user|
+    follower_user.follow(following_user)
+  end
 end
