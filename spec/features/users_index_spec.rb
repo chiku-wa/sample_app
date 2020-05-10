@@ -29,7 +29,7 @@ RSpec.feature "UsersIndex", type: :feature do
       click_link("Users")
 
       # ユーザ一覧で使用されているulの配下のliの数が想定どおりであること
-      number_of_users_one = User.where(activated: true).paginate(page: 1).each.size
+      number_of_users_one = 30
       expect_number_of_user(number_of_users_one)
 
       # 画面上部のNextを押下した場合に想定通りの結果が帰ってくること
