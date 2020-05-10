@@ -1,27 +1,37 @@
 <% provide(:title,@user.name) %>
 <div class="row">
     <aside class="col-md-4">
+        <%# ユーザのプロフィール情報 %>
         <section class="user_info">
             <h1>
                 <%= gravatar_for @user, {size: 200}%>
                 <%= @user.name %>
             </h1>
         </section>
+
         <%# フォロー数、フォロワー数 %>
         <section class="stats">
             <%= render "shared/stats" %>
         </section>
+
         <%# ログインしている場合のみ、フォロー・フォロー解除ボタンを表示する %>
         <% if logged_in? %>
         <%= render "follow_form" %>
         <% end %>
     </aside>
+
+    <%# マイクロポスト一覧を表示する %>
     <div class="col-md-8">
         <% if @user.microposts.any? %>
         <h3>Microposts(<%= @user.microposts.count %>)</h3>
         <ol class="microposts">
+            <%# ページネーションバー %>
             <%= will_paginate(@microposts) %>
+
+            <%# マイクロポスト一覧 %>
             <%= render @microposts %>
+
+            <%# ページネーションバー %>
             <%= will_paginate(@microposts) %>
         </ol>
         <% end %>
