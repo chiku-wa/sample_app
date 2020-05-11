@@ -54,7 +54,7 @@ RSpec.describe "UsersController-requests", type: :request do
       get edit_user_path(@user)
       follow_redirect!
 
-      # ログインページに遷移すること遷移すること
+      # ログインページに遷移すること
       expect(response).to(have_http_status("200"))
       assert_template "sessions/new"
 
@@ -65,6 +65,42 @@ RSpec.describe "UsersController-requests", type: :request do
 
       # 記憶されたURLがリセットされていること
       expect(session[:forwarding_url]).to be_blank
+    end
+
+    it "フォローしているユーザ一覧を表示しようとした場合はログインページに遷移し、ログイン後はフォローユーザ一覧画面に遷移すること" do
+      get following_user_path(@user)
+      follow_redirect!
+
+      # ログインページに遷移すること
+      expect(response).to(have_http_status("200"))
+      assert_template "sessions/new"
+
+      # ログインするとフォローユーザ一覧が表示されること
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+      follow_redirect!
+      expect(assigns[:title]).to eq("Following")
+      assert_template "users/show_follow"
+
+      # 記憶されたURLがリセットされていること
+      expect(session[:forword_url]).to be_blank
+    end
+
+    it "フォワー覧を表示しようとした場合はログインページに遷移し、ログイン後はフォローワー覧画面に遷移すること" do
+      get followers_user_path(@user)
+      follow_redirect!
+
+      # ログインページに遷移すること
+      expect(response).to(have_http_status("200"))
+      assert_template "sessions/new"
+
+      # ログインするとフォローユーザ一覧が表示されること
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+      follow_redirect!
+      expect(assigns[:title]).to eq("Followers")
+      assert_template "users/show_follow"
+
+      # 記憶されたURLがリセットされていること
+      expect(session[:forword_url]).to be_blank
     end
 
     it "ユーザを直接更新しようとした場合はログインページに遷移すること" do

@@ -28,6 +28,44 @@ RSpec.feature "FollowerFolloweds", type: :feature do
 
       expect_stat(@follower_user)
     end
+
+    scenario "フォローユーザ一覧画面で、一度に表示されるユーザが30件であること" do
+      # フォロー先ユーザを登録する
+      generate_followed_users(followed_user_number_of: 35, follower_user: @follower_user)
+
+      # ログインし、フォローユーザ一覧を表示する
+      login_operation(@follower_user)
+      click_link("following")
+      expect(page).to(have_title(full_title("Following")))
+
+      # 1ページ目(1ページに表示しきれない場合)は30件表示されること
+      number_of_users_one = 30
+      expect_number_of_users_follow(number_of_users_one)
+
+      # 画面上部のNextを押下した場合に想定通りの結果が返ってくること
+      click_link("Next →", match: :first)
+      number_of_users_two = @follower_user.following.paginate(page: 2).each.size
+      expect_number_of_users_follow(number_of_users_two)
+    end
+
+    scenario "フォロワー一覧画面で、一度に表示されるユーザが30件であること" do
+      # フォロワーを登録する
+      generate_follower_users(follower_user_number_of: 40, followed_user: @followed_user)
+
+      # ログインし、フォローユーザ一覧を表示する
+      login_operation(@followed_user)
+      click_link("followers")
+      expect(page).to(have_title(full_title("Followers")))
+
+      # 1ページ目(1ページに表示しきれない場合)は30件表示されること
+      number_of_users_one = 30
+      expect_number_of_users_follow(number_of_users_one)
+
+      # 画面上部のNextを押下した場合に想定通りの結果が返ってくること
+      click_link("Next →", match: :first)
+      number_of_users_two = @followed_user.followers.paginate(page: 2).each.size
+      expect_number_of_users_follow(number_of_users_two)
+    end
   end
 
   feature "プロフィール画面に関するテスト" do
