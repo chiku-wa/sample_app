@@ -28,19 +28,6 @@ RSpec.feature "FollowerFolloweds", type: :feature do
 
       expect_stat(@follower_user)
     end
-
-    scenario "フォローユーザ一覧画面で、一度に表示されるユーザが30件であること" do
-      # フォロワーを登録する
-      generate_follower_users(followed_user: @followed_user, number_of: 40)
-
-      # ログインし、フォローユーザ一覧を表示する
-      login_operation(@followed_user)
-      click_link("following")
-      expect(page).to(have_title(full_title("Following")))
-
-      number_of_users_one = 30
-      expect_number_of_users_follow(number_of_users_one)
-    end
   end
 
   feature "プロフィール画面に関するテスト" do
