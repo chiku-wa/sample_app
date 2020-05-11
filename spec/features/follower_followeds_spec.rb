@@ -10,16 +10,12 @@ RSpec.feature "FollowerFolloweds", type: :feature do
     @follower_user.save
     @followed_user = FactoryBot.build(:followed_user)
     @followed_user.save
-    @followed_user_second = FactoryBot.build(:followed_user_second)
-    @followed_user_second.save
     @follow_each_other_user = FactoryBot.build(:follower_user_second)
     @follow_each_other_user.save
     @independent_user = FactoryBot.build(:user)
     @independent_user.save
 
     @follower_user.follow(@followed_user)
-    @follower_user.follow(@followed_user_second)
-
     @follower_user.follow(@follow_each_other_user)
     @follow_each_other_user.follow(@follower_user)
   end
@@ -31,6 +27,19 @@ RSpec.feature "FollowerFolloweds", type: :feature do
       visit root_path
 
       expect_stat(@follower_user)
+    end
+
+    scenario "フォローユーザ一覧画面で、一度に表示されるユーザが30件であること" do
+      # フォロワーを登録する
+      generate_follower_users(followed_user: @followed_user, number_of: 40)
+
+      # ログインし、フォローユーザ一覧を表示する
+      login_operation(@followed_user)
+      click_link("following")
+      expect(page).to(have_title(full_title("Following")))
+
+      number_of_users_one = 30
+      expect_number_of_users_follow(number_of_users_one)
     end
   end
 
@@ -53,11 +62,11 @@ RSpec.feature "FollowerFolloweds", type: :feature do
       login_operation(@follower_user)
 
       # フォローしていないユーザならフォローボタンが表示されていること
-      visit user_path(@followed_user)
+      visit user_path(@independent_user)
       expect_follow_unfollow(follow: 1, unfollow: 0)
 
       # フォローしているユーザならフォロー解除ボタンが表示されていること
-      visit user_path(@independent_user)
+      visit user_path(@followed_user)
       expect_follow_unfollow(follow: 0, unfollow: 1)
     end
   end
@@ -93,7 +102,7 @@ RSpec.feature "FollowerFolloweds", type: :feature do
     )
   end
 
-  # フォローボタン、フォロー解除ボタンが指定した個数出現しているかを確認するためのメソッド
+  # フォローボタン、フォロー解除ボタンが想定通り存在しているかを確認するためのメソッド
   def expect_follow_unfollow(follow:, unfollow:)
     # フォロー・フォロー解除ボタンが表示されるdivエリアのXpath
     xpath_follow_form = "//div[@id='follow_form']"
@@ -113,5 +122,12 @@ RSpec.feature "FollowerFolloweds", type: :feature do
         count: unfollow,
       )
     )
+  end
+
+  # 画面上に表示されたユーザ数が想定通りであることを確認するメソッド
+  def expect_number_of_users_follow(number_of_users)
+    within(:css, "//ul[@class=users]") do
+      expect(page).to(have_css("li", count: number_of_users))
+    end
   end
 end
