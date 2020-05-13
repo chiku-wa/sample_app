@@ -77,12 +77,6 @@ RSpec.feature "FollowerFolloweds", type: :feature do
       expect_stat(@follower_user)
     end
 
-    scenario "ログインユーザのプロフィールにフォロー・フォロー解除ボタンが表示されていないこと" do
-      login_operation(@follower_user)
-
-      expect_follow_unfollow(follow: 0, unfollow: 0)
-    end
-
     scenario "フォローしていないユーザならフォローボタンが、フォローしているユーザならフォロー解除ボタンが表示されること" do
       login_operation(@follower_user)
 
@@ -93,6 +87,48 @@ RSpec.feature "FollowerFolloweds", type: :feature do
       # フォローしているユーザならフォロー解除ボタンが表示されていること
       visit user_path(@followed_user)
       expect_follow_unfollow(follow: 0, unfollow: 1)
+    end
+
+    scenario "フォローしていないユーザの場合はフォローすることができること" do
+      login_operation(@follower_user)
+
+      # フォローしていないユーザのプロフィール画面に遷移する
+      visit user_path(@independent_user)
+      expect_follow_unfollow(follow: 1, unfollow: 0)
+
+      # フォローボタンを押下するとプロフィール画面に遷移し、フォロー解除ボタンに切り替わること
+      click_button("Follow")
+      expect(page).to(have_title(full_title(@independent_user.name)))
+      expect_follow_unfollow(follow: 0, unfollow: 1)
+    end
+
+    scenario "すでにフォロー済みのユーザの場合はフォロー解除できること" do
+      login_operation(@follower_user)
+
+      # フォロー済みのユーザのプロフィール画面に遷移する
+      visit user_path(@followed_user)
+      expect_follow_unfollow(follow: 0, unfollow: 1)
+
+      # フォロー解除ボタンを押下するとプロフィール画面に遷移し、フォローボタンに切り替わること
+      click_button("Unfollow")
+      expect(page).to(have_title(full_title(@followed_user.name)))
+      expect_follow_unfollow(follow: 1, unfollow: 0)
+    end
+
+    scenario "フォローとフォロー解除を切り替えることができること" do
+      login_operation(@follower_user)
+
+      # フォローしていないユーザのプロフィール画面に遷移する
+      visit user_path(@independent_user)
+      expect_follow_unfollow(follow: 1, unfollow: 0)
+
+      # フォローボタンを押下するとフォロー解除ボタンに切り替わること
+      click_button("Follow")
+      expect_follow_unfollow(follow: 0, unfollow: 1)
+
+      # フォロー解除ボタンを謳歌するとフォローボタンに切り替わること
+      click_button("Unfollow")
+      expect_follow_unfollow(follow: 1, unfollow: 0)
     end
   end
 
