@@ -10,14 +10,10 @@ RSpec.describe "FollowerFollowedController-requests", type: :request do
     @follower_user.save
     @followed_user = FactoryBot.build(:followed_user)
     @followed_user.save
-    @follow_each_other_user = FactoryBot.build(:follower_user_second)
-    @follow_each_other_user.save
     @independent_user = FactoryBot.build(:user)
     @independent_user.save
 
     @follower_user.follow(@followed_user)
-    @follower_user.follow(@follow_each_other_user)
-    @follow_each_other_user.follow(@follower_user)
   end
 
   context "未ログインユーザのアクセスが許可されていないアクションのテスト" do
@@ -90,7 +86,7 @@ RSpec.describe "FollowerFollowedController-requests", type: :request do
       follow_redirect!
 
       # すでにフォロー済みのユーザであること
-      target_user = @follow_each_other_user
+      target_user = @followed_user
       expect(@follower_user.following?(target_user)).to be_truthy
 
       # フォローしてもエラーにならず、プロフィール画面に遷移すること
