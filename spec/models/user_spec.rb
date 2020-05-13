@@ -170,6 +170,34 @@ RSpec.describe "Userモデルのテスト", type: :model do
       expect(follower_followeds.size).to eq 1
     end
 
+    it "すでにフォロー済みのユーザをフォローしようとした場合はエラーにならないこと" do
+      @user.save
+
+      # フォローするユーザを作成する
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォロー情報が登録されていること
+      expect {
+        # フォローする
+        @user.follow(followed_user)
+
+        # バリデーションを通過すること
+        expect(@user).to be_valid
+      }.to change(FollowerFollowed, :count).by(1)
+
+      # 2回目のフォローでエラーにならないこと
+      expect {
+        # フォローする
+        @user.follow(followed_user)
+      }.not_to raise_error
+    end
+
     it "フォローしているユーザを確認できること" do
       @user.save
 
@@ -216,6 +244,31 @@ RSpec.describe "Userモデルのテスト", type: :model do
       # フォロー解除する
       @user.unfollow(followed_user)
       expect(@user.following.size).to eq 0
+    end
+
+    it "すでにフォロー解除済みのユーザーをフォロー解除しようとしてもエラーにならないこと" do
+      @user.save
+
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォローする
+      @user.follow(followed_user)
+      expect(@user.following.size).to eq 1
+
+      # フォロー解除する
+      @user.unfollow(followed_user)
+      expect(@user.following.size).to eq 0
+
+      # 2回目のフォロー解除でエラーにならないこと
+      expect {
+        @user.unfollow(followed_user)
+      }.not_to raise_error
     end
 
     it "フォローもとのユーザが削除された場合はフォロー情報が削除されること" do
