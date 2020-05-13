@@ -74,7 +74,9 @@ RSpec.describe "FollowerFollowedController-requests", type: :request do
       expect(@follower_user.following?(target_user)).to be_falsey
 
       # フォローする
-      post follower_followeds_path, params: { followed_id: target_user.id }
+      expect {
+        post follower_followeds_path, params: { followed_id: target_user.id }
+      }.to change(FollowerFollowed, :count).by(1)
 
       # フォローできていること
       expect(@follower_user.following?(target_user)).to be_truthy
@@ -111,7 +113,9 @@ RSpec.describe "FollowerFollowedController-requests", type: :request do
       expect(@follower_user.following?(target_user)).to be_truthy
 
       # フォロー解除する
-      delete follower_followed_path(target_user)
+      expect {
+        delete follower_followed_path(target_user)
+      }.to change(FollowerFollowed, :count).by(-1)
 
       # フォロー解除されていること
       expect(@follower_user.following?(target_user)).to be_falsey
