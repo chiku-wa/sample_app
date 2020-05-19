@@ -26,5 +26,8 @@ module SampleApp
 
     # DBに登録するときのタイムゾーン
     config.active_record.default_timezone = :local
+
+    # remote: trueのフォームでも認証トークンが送信されるようにする
+    config.action_view.embed_authenticity_token_in_remote_forms = true
   end
 end

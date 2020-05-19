@@ -31,6 +31,7 @@ ActiveRecord::Migration.maintain_test_schema!
 # RSpecのテストで使用する汎用クラスの読み込み
 Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
 
+# =========== RSpecの設定
 RSpec.configure do |config|
   # 自作のテスト補助用マクロモジュール
   config.include CommonMacros
@@ -69,3 +70,15 @@ RSpec.configure do |config|
 
   include ApplicationHelper
 end
+
+# ========== Capybaraの設定
+# ----- Firefox用ドライバの設定
+Capybara.register_driver :firefox_headless do |app|
+  options = ::Selenium::WebDriver::Firefox::Options.new
+
+  # ヘッドレスを有効化(テスト実行時にブラウザの画面が立ち上がらないようにする)
+  options.args << "--headless"
+
+  Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
+end
+Capybara.javascript_driver = :firefox_headless

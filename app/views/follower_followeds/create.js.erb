@@ -1,0 +1,5 @@
+<%# フォロー解除ボタンに差し替える %>
+$("#follow_form").html("<%= escape_javascript(render('users/unfollow')) %>");
+
+<%# フォロワー数をカウントアップする %>
+$("#followers").html("<%= @user.followers.count %>");

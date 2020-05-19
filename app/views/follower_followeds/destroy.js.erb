@@ -1,0 +1,5 @@
+<%# フォローボタンに差し替える %>
+$("#follow_form").html("<%= escape_javascript(render('users/follow')) %>");
+
+<%# フォロワー数をカウントダウンする %>
+$("#followers").html("<%= @user.followers.count %>");

@@ -3,10 +3,19 @@ class FollowerFollowedsController < ApplicationController
 
   # ユーザをフォローするアクション
   def create
-    user = User.find_by(id: params[:followed_id])
-    if user
-      current_user.follow(user)
-      redirect_to(user_path(user))
+    # 対応するJavaScriptからUserインスタンスを呼び出すために、インスタンス変数に格納する
+    @user = User.find_by(id: params[:followed_id])
+
+    if @user
+      # フォローする
+      current_user.follow(@user)
+
+      # HTMLフォームによる通信ならプロフィール画面をリダイレクト表示し、Ajaxによる非同期通信なら
+      # 対応するJavaScriptを呼び出す
+      respond_to do |format|
+        format.html { redirect_to(user_path(@user)) }
+        format.js
+      end
     else
       redirect_to(root_path)
     end
@@ -14,10 +23,17 @@ class FollowerFollowedsController < ApplicationController
 
   # ユーザをフォロー解除するアクション
   def destroy
-    user = User.find_by(id: params[:id])
-    if user
-      current_user.unfollow(user)
-      redirect_to(user_path(user))
+    @user = User.find_by(id: params[:id])
+    if @user
+      # フォロー解除する
+      current_user.unfollow(@user)
+
+      # HTMLフォームによる通信ならプロフィール画面をリダイレクト表示し、Ajaxによる非同期通信なら
+      # 対応するJavaScriptを呼び出す
+      respond_to do |format|
+        format.html { redirect_to(user_path(@user)) }
+        format.js
+      end
     else
       redirect_to(root_path)
     end
