@@ -52,6 +52,9 @@ jobs:
             paths:
               - vendor/bundle
 
+      # JavaScript動作検証用にブラウザツールを導入する
+      - browser-tools/install-browser-tools
+
       # RSpecを実行する
       - run:
           name: RSpecを並列実行
@@ -65,3 +68,5 @@ jobs:
       - store_test_results:
             path:
               test_results
+orbs:
+  browser-tools: circleci/browser-tools@x.y
