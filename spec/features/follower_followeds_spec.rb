@@ -89,7 +89,7 @@ RSpec.feature "FollowerFolloweds", type: :feature do
       expect_follow_unfollow(follow: 0, unfollow: 1)
     end
 
-    scenario "フォローしていないユーザの場合はフォローすることができること" do
+    scenario "フォローしていないユーザの場合はフォローできること" do
       login_operation(@follower_user)
 
       # フォローしていないユーザのプロフィール画面に遷移する
@@ -100,19 +100,9 @@ RSpec.feature "FollowerFolloweds", type: :feature do
       click_button("Follow")
       expect(page).to(have_title(full_title(@independent_user.name)))
       expect_follow_unfollow(follow: 0, unfollow: 1)
-    end
 
-    scenario "フォローしていないユーザの場合はフォローすることができること(JavaScript)", js: true do
-      login_operation(@follower_user)
-
-      # フォローしていないユーザのプロフィール画面に遷移する
-      visit user_path(@independent_user)
-      expect_follow_unfollow(follow: 1, unfollow: 0)
-
-      # フォローボタンを押下するとプロフィール画面に遷移し、フォロー解除ボタンに切り替わること
-      click_button("Follow")
-      expect(page).to(have_title(full_title(@independent_user.name)))
-      expect_follow_unfollow(follow: 0, unfollow: 1)
+      # 統計情報が想定どおりであること
+      expect_stat(@independent_user)
     end
 
     scenario "すでにフォロー済みのユーザの場合はフォロー解除できること" do
@@ -126,6 +116,9 @@ RSpec.feature "FollowerFolloweds", type: :feature do
       click_button("Unfollow")
       expect(page).to(have_title(full_title(@followed_user.name)))
       expect_follow_unfollow(follow: 1, unfollow: 0)
+
+      # 統計情報が想定どおりであること
+      # expect_stat(@followed_user)
     end
 
     scenario "フォローとフォロー解除を切り替えることができること" do
@@ -164,7 +157,7 @@ RSpec.feature "FollowerFolloweds", type: :feature do
       )
     )
 
-    # フォロワー数が表示されていること
+    # フォロワー数とリンクが表示されていること
     expect(
       page.all("#{xpath_stats}/a/strong[@id='followers']/text()")[0]
     ).to(have_content(user.followers.size))

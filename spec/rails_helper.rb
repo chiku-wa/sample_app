@@ -81,4 +81,5 @@ Capybara.register_driver :firefox_headless do |app|
 
   Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
 end
+# js: trueを指定したときに使用するJavaScriptのドライバを指定
 Capybara.javascript_driver = :firefox_headless
