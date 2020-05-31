@@ -118,7 +118,7 @@ RSpec.feature "FollowerFolloweds", type: :feature do
       expect_follow_unfollow(follow: 1, unfollow: 0)
 
       # 統計情報が想定どおりであること
-      # expect_stat(@followed_user)
+      expect_stat(@followed_user)
     end
 
     scenario "フォローとフォロー解除を切り替えることができること" do
