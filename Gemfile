@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 gem "bootstrap-sass", "3.4.1"
 gem "bootsnap", require: false
-gem "rails", "5.2.4.2"
+gem "rails", "5.2.4.3"
 gem "bcrypt", "3.1.13"
 gem "puma", "3.12.4"
 gem "sass-rails", "5.0.6"
