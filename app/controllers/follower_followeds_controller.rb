@@ -23,7 +23,9 @@ class FollowerFollowedsController < ApplicationController
 
   # ユーザをフォロー解除するアクション
   def destroy
+    # 対応するJavaScriptからUserインスタンスを呼び出すために、インスタンス変数に格納する
     @user = User.find_by(id: params[:id])
+
     if @user
       # フォロー解除する
       current_user.unfollow(@user)
