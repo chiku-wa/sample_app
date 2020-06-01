@@ -63,7 +63,29 @@ RSpec.describe "FollowerFollowedController-requests", type: :request do
   end
 
   context "フォロー機能に関するテスト" do
-    it "ユーザをフォローすることができ、フォロー後はそのユーザのプロフィール画面に遷移すること" do
+    it "ユーザをフォロー(Ajax通信)することができ、フォロー後はそのユーザのプロフィール画面に遷移すること" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@follower_user, remember_me: true) }
+      follow_redirect!
+
+      target_user = @independent_user
+
+      # まだフォローしていないこと
+      expect(@follower_user.following?(target_user)).to be_falsey
+
+      # フォローする
+      expect {
+        post follower_followeds_path, params: { followed_id: target_user.id }, xhr: true
+      }.to change(FollowerFollowed, :count).by(1)
+
+      # リダイレクトされないこと
+      expect(response).not_to(redirect_to(user_path(target_user)))
+
+      # フォローできていること
+      expect(@follower_user.following?(target_user)).to be_truthy
+    end
+
+    it "ユーザをフォロー(非Ajax通信)することができ、フォロー後はそのユーザのプロフィール画面に遷移すること" do
       # ログインする
       post login_path, params: { sessions: params_login(@follower_user, remember_me: true) }
       follow_redirect!
@@ -77,6 +99,9 @@ RSpec.describe "FollowerFollowedController-requests", type: :request do
       expect {
         post follower_followeds_path, params: { followed_id: target_user.id }
       }.to change(FollowerFollowed, :count).by(1)
+
+      # フォローしたユーザのプロフィール画面にリダイレクトされること
+      expect(response).to(redirect_to(user_path(target_user)))
 
       # フォローできていること
       expect(@follower_user.following?(target_user)).to be_truthy
@@ -102,7 +127,29 @@ RSpec.describe "FollowerFollowedController-requests", type: :request do
   end
 
   context "フォロー解除機能に関するテスト" do
-    it "フォロー済みのユーザの場合はフォロー解除することができ、フォロー解除後はそのユーザのプロフィール画面に遷移すること" do
+    it "フォロー済みのユーザの場合はフォロー解除(Ajax通信)することができ、フォロー解除後はそのユーザのプロフィール画面に遷移すること" do
+      # ログインする
+      post login_path, params: { sessions: params_login(@follower_user, remember_me: true) }
+      follow_redirect!
+
+      target_user = @followed_user
+
+      # すでにフォロー済みであること
+      expect(@follower_user.following?(target_user)).to be_truthy
+
+      # フォロー解除する
+      expect {
+        delete follower_followed_path(target_user), xhr: true
+      }.to change(FollowerFollowed, :count).by(-1)
+
+      # リダイレクトされないこと
+      expect(response).not_to(redirect_to(user_path(target_user)))
+
+      # フォロー解除されていること
+      expect(@follower_user.following?(target_user)).to be_falsey
+    end
+
+    it "フォロー済みのユーザの場合はフォロー解除(非Ajax通信)することができ、フォロー解除後はそのユーザのプロフィール画面に遷移すること" do
       # ログインする
       post login_path, params: { sessions: params_login(@follower_user, remember_me: true) }
       follow_redirect!
@@ -116,6 +163,9 @@ RSpec.describe "FollowerFollowedController-requests", type: :request do
       expect {
         delete follower_followed_path(target_user)
       }.to change(FollowerFollowed, :count).by(-1)
+
+      # リダイレクトされないこと
+      expect(response).to(redirect_to(user_path(target_user)))
 
       # フォロー解除されていること
       expect(@follower_user.following?(target_user)).to be_falsey
