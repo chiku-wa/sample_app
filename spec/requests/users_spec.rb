@@ -112,6 +112,74 @@ RSpec.describe "UsersController-requests", type: :request do
     end
   end
 
+  context "ホーム画面に関するテスト" do
+    it "自分自身と、フォローしているユーザのマイクロポストが更新日時の新しい順に表示されていること" do
+      # ログイン処理
+      post login_path, params: { sessions: params_login(@user, remember_me: true) }
+
+      # ユーザをフォローする(userがuser_secondをフォロー)
+      @user.follow(@user_second)
+
+      # 自分自身のマイクロポストを登録する
+      [
+        FactoryBot.build(:micropost_2hours_ago),
+        FactoryBot.build(:micropost_latest),
+      ].each do |m|
+        @user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      @user.save
+
+      # フォローしているユーザのマイクロポストを登録する
+      [
+        FactoryBot.build(:micropost_3years_ago),
+        FactoryBot.build(:micropost_10min_ago),
+      ].each do |m|
+        @user_second.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      @user_second.save
+
+      # フォローしていないユーザのマイクロポストを登録する
+      unfollowed_user = User.new(
+        name: "Bob",
+        email: "Bob@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      unfollowed_user.save
+      [
+        FactoryBot.build(:micropost_3years_ago),
+        FactoryBot.build(:micropost_2hours_ago),
+        FactoryBot.build(:micropost_10min_ago),
+        FactoryBot.build(:micropost_latest),
+      ].each do |m|
+        unfollowed_user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      unfollowed_user.save
+
+      # ホーム画面をリクエストする
+      get root_path
+
+      # 投稿日時の件数と並び順が想定通りであることを確認する
+      expect(assigns[:feed_items].size).to eq 4
+
+      expect_first = FactoryBot.build(:micropost_latest)
+      expect(assigns[:feed_items][0].content).to eq expect_first.content
+      expect(assigns[:feed_items][0].created_at).to eq expect_first.created_at
+
+      expect_second = FactoryBot.build(:micropost_10min_ago)
+      expect(assigns[:feed_items][1].content).to eq expect_second.content
+      expect(assigns[:feed_items][1].created_at).to eq expect_second.created_at
+
+      expect_third = FactoryBot.build(:micropost_2hours_ago)
+      expect(assigns[:feed_items][2].content).to eq expect_third.content
+      expect(assigns[:feed_items][2].created_at).to eq expect_third.created_at
+
+      expect_fourth = FactoryBot.build(:micropost_3years_ago)
+      expect(assigns[:feed_items][3].content).to eq expect_fourth.content
+      expect(assigns[:feed_items][3].created_at).to eq expect_fourth.created_at
+    end
+  end
+
   context "ユーザ一覧機能に関するテスト" do
     it "直接アクセス、Next、Previousが正常に機能すること" do
       post login_path, params: { sessions: params_login(@user, remember_me: true) }

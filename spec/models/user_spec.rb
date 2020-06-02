@@ -317,6 +317,61 @@ RSpec.describe "Userモデルのテスト", type: :model do
     end
   end
 
+  context "フィード機能のテスト" do
+    it "自身とフォローしているユーザのマイクロポストの一覧が取得できること" do
+      @user.save
+
+      # フォローするユーザを作成しフォローする
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+      @user.follow(followed_user)
+
+      # 自分自身のマイクロポストを登録する
+      [
+        FactoryBot.build(:micropost_2hours_ago),
+        FactoryBot.build(:micropost_latest),
+      ].each do |m|
+        @user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      @user.save
+
+      # フォローしているユーザのマイクロポストを登録する
+      [
+        FactoryBot.build(:micropost_3years_ago),
+        FactoryBot.build(:micropost_10min_ago),
+      ].each do |m|
+        followed_user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      followed_user.save
+
+      # フォローしていないユーザのマイクロポストを登録する
+      unfollowed_user = User.new(
+        name: "Bob",
+        email: "Bob@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      unfollowed_user.save
+      [
+        FactoryBot.build(:micropost_3years_ago),
+        FactoryBot.build(:micropost_2hours_ago),
+        FactoryBot.build(:micropost_10min_ago),
+        FactoryBot.build(:micropost_latest),
+      ].each do |m|
+        unfollowed_user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      unfollowed_user.save
+
+      # 投稿日時の件数が想定通りであることを確認する
+      expect(@user.feed.size).to eq 4
+    end
+  end
+
   context "その他のテスト" do
     it "emailが小文字に変換されて登録されること" do
       mixed_case_email = "Tom@example.com"

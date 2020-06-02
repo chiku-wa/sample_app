@@ -140,9 +140,13 @@ class User < ApplicationRecord
     reset_sent_at < 2.hours.ago
   end
 
-  # 指定したユーザのマイクロポストを取得する
+  # フォローしているユーザのマイクロポストを取得する
   def feed
-    Micropost.where(user_id: id)
+    Micropost.where(
+      "user_id = :user_id OR user_id IN (:following_ids)",
+      user_id: id,
+      following_ids: following_ids,
+    )
   end
 
   # 対象ユーザをフォローする
