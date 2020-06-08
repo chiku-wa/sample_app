@@ -1,0 +1,33 @@
+@startuml
+
+object User {
+  id
+  name
+  email
+  created_at
+  ...
+}
+
+object Micropost1 {
+  id
+  content
+  ...
+}
+
+object Micropost2 {
+  id
+  content
+  ...
+}
+
+object Micropost3 {
+  id
+  content
+  ...
+}
+
+User "has_many" --> Micropost1
+User "has_many" --> Micropost2
+User "has_many" --> Micropost3
+
+@enduml

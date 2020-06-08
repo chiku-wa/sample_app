@@ -1,7 +1,13 @@
 <% if @feed_items&.any? %>
+
+<%# ページネーションバー %>
 <%= will_paginate(@feed_items) %>
+
 <ol class="microposts">
-  <%= render @feed_items %>
+    <%= render @feed_items %>
 </ol>
+
+<%# ページネーションバー %>
 <%= will_paginate(@feed_items) %>
+
 <% end %>

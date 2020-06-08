@@ -38,6 +38,73 @@ RSpec.feature "Microposts", type: :feature do
     @user.save
   end
 
+  feature "TOP画面のマイクロポスト一覧に関するテスト" do
+    scenario "自分自身とフォローしているユーザのマイクロポスト一覧が表示されていること" do
+      login_operation(@user)
+
+      # ユーザとフォロー関係を作成する
+      # * follower_user ー(フォロー)→ followed_user,followed_user_second
+      # * independent_user ※フォローしていないユーザ
+      followed_user = FactoryBot.build(:followed_user)
+      followed_user.save
+      followed_user_second = FactoryBot.build(:followed_user_second)
+      followed_user_second.save
+      independent_user = FactoryBot.build(:user)
+      independent_user.save
+      @user.follow(followed_user)
+      @user.follow(followed_user_second)
+
+      # フォローしているユーザのマイクロポストを登録する
+      [
+        FactoryBot.build(:micropost_3years_ago),
+      ].each do |m|
+        followed_user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      followed_user.save
+      [
+        FactoryBot.build(:micropost_5min_ago),
+        FactoryBot.build(:micropost_5years_ago),
+      ].each do |m|
+        followed_user_second.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      followed_user_second.save
+
+      # フォローしていないユーザのマイクロポストを登録する
+      [
+        FactoryBot.build(:micropost_10min_ago),
+        FactoryBot.build(:micropost_2hours_ago),
+        FactoryBot.build(:micropost_latest),
+      ].each do |m|
+        independent_user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      independent_user.save
+
+      # -----TOP画面に遷移し、マイクロポストが想定通り表示されていること
+      visit root_path
+
+      # 想定どおりの件数であること
+      expect_number_of = @user.microposts.size \
+        + followed_user.microposts.size \
+        + followed_user_second.microposts.size
+      within(:css, ".microposts") do
+        expect(page).to(have_css(:li, count: expect_number_of))
+      end
+
+      # 自分自身とフォローしているユーザの投稿が存在すること
+      xpath_microposts = "//ol[@class='microposts']"
+      puts "#{xpath_microposts}/li[@id='micropost-#{@user.microposts.first.id}']"
+      expect(
+        page.all("#{xpath_microposts}/li[@id='micropost-#{@user.microposts.first.id}']").size
+      ).to eq(1)
+      expect(
+        page.all("#{xpath_microposts}/li[@id='micropost-#{followed_user.microposts.first.id}']").size
+      ).to eq(1)
+      expect(
+        page.all("#{xpath_microposts}/li[@id='micropost-#{followed_user_second.microposts.first.id}']").size
+      ).to eq(1)
+    end
+  end
+
   feature "投稿画面に関するテスト" do
     scenario "ログインしている間のみ、TOP画面に投稿画面とマイクロポスト一覧が表示されていること" do
       # 未ログイン時は投稿画面とマイクロポスト一覧が表示されないこと
@@ -55,17 +122,6 @@ RSpec.feature "Microposts", type: :feature do
       logout_operation
       expect(page).to(have_xpath(xpath_post_form, count: 0))
       expect(page).to(have_xpath(xpath_micropost_list, count: 0))
-    end
-
-    scenario "ログインしている間のみ、プロフィール画面にマイクロポスト一覧が表示されていること" do
-      # 未ログイン時はマイクロポスト一覧が表示されないこと
-      visit user_path(@user)
-      expect(page).to(have_xpath(xpath_micropost_list, count: 0))
-
-      # ログイン時はマイクロポスト一覧が表示されていること
-      login_operation(@user)
-      visit user_path(@user)
-      expect(page).to(have_xpath(xpath_micropost_list, count: 1))
     end
 
     scenario "ログインしている間のみ、TOP画面にマイクロポスト一覧が表示されていること" do
@@ -238,6 +294,19 @@ RSpec.feature "Microposts", type: :feature do
       visit user_path(@user)
       all(:xpath, xpath_delete_button)[1].click
       expect(page).to have_title(full_title(@user.name))
+    end
+  end
+
+  feature "プロフィール画面に関するテスト" do
+    scenario "ログインしている間のみ、プロフィール画面にマイクロポスト一覧が表示されていること" do
+      # 未ログイン時はマイクロポスト一覧が表示されないこと
+      visit user_path(@user)
+      expect(page).to(have_xpath(xpath_micropost_list, count: 0))
+
+      # ログイン時はマイクロポスト一覧が表示されていること
+      login_operation(@user)
+      visit user_path(@user)
+      expect(page).to(have_xpath(xpath_micropost_list, count: 1))
     end
   end
 

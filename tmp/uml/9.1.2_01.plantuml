@@ -1,0 +1,21 @@
+@startuml
+
+object User {
+  def remember
+  　1. remember_tokenに乱数の文字列を格納
+  　2. 暗号化したremember_tokenを暗号化し、DBに登録
+  end
+}
+
+object SessionsHelper {
+  ★今回実装するメソッド
+  def remember
+  　1. rememberメソッド呼び出し
+  　2. CookieでユーザIDを格納
+  　3. Cookieでトークン(remember_token:平文のトークン)を格納
+  end
+}
+
+User -> SessionsHelper
+
+@enduml

@@ -9,11 +9,6 @@ user_admin = User.create!(
   activated: true,
   activated_at: Time.zone.now,
 )
-# マイクロポスト登録
-99.times do |i|
-  user_admin.microposts.build(content: "Test content#{i}.")
-end
-user_admin.save
 
 # ===== テストユーザ登録
 # ユーザ登録
@@ -33,10 +28,42 @@ users = []
 end
 User.import(users)
 
-# 一部のユーザのみ、マイクロポストを50件登録する
-users = User.order(created_at: :asc).take(3)
-users.each do |u|
+# ---------- フォローとフォロワーの関係を作成し、マイクロポストを登録する
+# フォローデータ関係を作成する
+follower_users = User.order(id: :asc).take(3)
+following_users = User.order(id: :desc).take(10)
+
+follower_users.each do |follower_user|
+  following_users.each do |following_user|
+    follower_user.follow(following_user)
+  end
+end
+
+# フォロワーのマイクロポストを登録する
+follower_users.each do |u|
   50.times do |i|
+    content = "#{Faker::Lorem.sentence} #{i}"
+    u.microposts.build(content: content)
+  end
+  u.save
+end
+
+# フォローされているユーザのマイクロポストを登録する
+following_users.each do |u|
+  20.times do |i|
+    content = "#{Faker::Lorem.sentence} #{i}"
+    u.microposts.build(content: content)
+  end
+  u.save
+end
+
+# ---------- フォロー関係のない一部のユーザのマイクロポストを登録する
+not_follow_users = User.where(
+  "id NOT IN (:ids)",
+  ids: (follower_users + following_users).map(&:id),
+)
+not_follow_users.take(3).each do |u|
+  10.times do |i|
     content = "#{Faker::Lorem.sentence} #{i}"
     u.microposts.build(content: content)
   end

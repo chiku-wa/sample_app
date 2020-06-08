@@ -1,0 +1,19 @@
+@startuml
+
+object User {
+  id
+  name
+  email
+  created_at
+  ...
+}
+
+object Micropost {
+  id
+  content
+  ...
+}
+
+Micropost --> "belongs_to" User
+
+@enduml

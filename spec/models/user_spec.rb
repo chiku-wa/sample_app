@@ -140,6 +140,238 @@ RSpec.describe "Userモデルのテスト", type: :model do
     end
   end
 
+  context "フォロー機能のテスト" do
+    it "指定したユーザをフォローできること" do
+      @user.save
+
+      # フォローするユーザを作成する
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォロー情報が登録されていること
+      expect {
+        # フォローする
+        @user.follow(followed_user)
+
+        # バリデーションを通過すること
+        expect(@user).to be_valid
+      }.to change(FollowerFollowed, :count).by(1)
+
+      # 想定した件数、内容が登録されていること
+      follower_followeds = FollowerFollowed.where({
+        follower_id: @user.id,
+        followed_id: followed_user.id,
+      })
+      expect(follower_followeds.size).to eq 1
+    end
+
+    it "すでにフォロー済みのユーザをフォローしようとした場合はエラーにならないこと" do
+      @user.save
+
+      # フォローするユーザを作成する
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォロー情報が登録されていること
+      expect {
+        # フォローする
+        @user.follow(followed_user)
+
+        # バリデーションを通過すること
+        expect(@user).to be_valid
+      }.to change(FollowerFollowed, :count).by(1)
+
+      # 2回目のフォローでエラーにならないこと
+      expect {
+        # フォローする
+        @user.follow(followed_user)
+      }.not_to raise_error
+    end
+
+    it "フォローしているユーザを確認できること" do
+      @user.save
+
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      followed_user_second = User.new(
+        name: "Bob",
+        email: "Bob@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user_second.save
+
+      # フォローする
+      @user.follow(followed_user)
+      @user.follow(followed_user_second)
+
+      # フォローしているユーザが取得できること
+      expect(@user.following?(followed_user)).to be_truthy
+      expect(@user.following?(followed_user_second)).to be_truthy
+    end
+
+    it "フォローを解除できること" do
+      @user.save
+
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォローする
+      @user.follow(followed_user)
+      expect(@user.following.size).to eq 1
+
+      # フォロー解除する
+      @user.unfollow(followed_user)
+      expect(@user.following.size).to eq 0
+    end
+
+    it "すでにフォロー解除済みのユーザーをフォロー解除しようとしてもエラーにならないこと" do
+      @user.save
+
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォローする
+      @user.follow(followed_user)
+      expect(@user.following.size).to eq 1
+
+      # フォロー解除する
+      @user.unfollow(followed_user)
+      expect(@user.following.size).to eq 0
+
+      # 2回目のフォロー解除でエラーにならないこと
+      expect {
+        @user.unfollow(followed_user)
+      }.not_to raise_error
+    end
+
+    it "フォローもとのユーザが削除された場合はフォロー情報が削除されること" do
+      @user.save
+
+      # フォローするユーザを作成する
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォローする
+      @user.following << followed_user
+
+      # 削除されたユーザがフォロワーとなっているフォロー情報が削除されること
+      expect {
+        @user.destroy
+      }.to change(FollowerFollowed, :count).by(-1)
+
+      follower_followeds = FollowerFollowed.where({
+        follower_id: @user.id,
+      })
+      expect(follower_followeds.size).to eq 0
+    end
+
+    it "フォロー先のユーザが削除されてもフォロー情報が残ること" do
+      # フォローするユーザを作成する
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+
+      # フォローする
+      @user.following << followed_user
+
+      # フォローしているユーザを削除しても、フォロー情報は削除されないこと
+      expect {
+        followed_user.destroy
+      }.to change(FollowerFollowed, :count).by(0)
+    end
+  end
+
+  context "フィード機能のテスト" do
+    it "自身とフォローしているユーザのマイクロポストの一覧が取得できること" do
+      @user.save
+
+      # フォローするユーザを作成しフォローする
+      followed_user = User.new(
+        name: "Alice",
+        email: "Alice@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      followed_user.save
+      @user.follow(followed_user)
+
+      # 自分自身のマイクロポストを登録する
+      [
+        FactoryBot.build(:micropost_2hours_ago),
+        FactoryBot.build(:micropost_latest),
+      ].each do |m|
+        @user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      @user.save
+
+      # フォローしているユーザのマイクロポストを登録する
+      [
+        FactoryBot.build(:micropost_3years_ago),
+        FactoryBot.build(:micropost_10min_ago),
+      ].each do |m|
+        followed_user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      followed_user.save
+
+      # フォローしていないユーザのマイクロポストを登録する
+      unfollowed_user = User.new(
+        name: "Bob",
+        email: "Bob@example.com",
+        password: "foobar",
+        password_confirmation: "foobar",
+      )
+      unfollowed_user.save
+      [
+        FactoryBot.build(:micropost_3years_ago),
+        FactoryBot.build(:micropost_2hours_ago),
+        FactoryBot.build(:micropost_10min_ago),
+        FactoryBot.build(:micropost_latest),
+      ].each do |m|
+        unfollowed_user.microposts.build(content: m.content, created_at: m.created_at)
+      end
+      unfollowed_user.save
+
+      # 投稿日時の件数が想定通りであることを確認する
+      expect(@user.feed.size).to eq 4
+    end
+  end
+
   context "その他のテスト" do
     it "emailが小文字に変換されて登録されること" do
       mixed_case_email = "Tom@example.com"

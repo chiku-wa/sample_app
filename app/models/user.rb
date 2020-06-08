@@ -7,7 +7,44 @@ class User < ApplicationRecord
   before_create :create_activation_digest
 
   # === 従属関係
-  has_many(:microposts, dependent: :destroy)
+  # マイクロポスト
+  has_many(
+    :microposts,
+    { dependent: :destroy },
+  )
+
+  # 自身がフォローしているユーザの一覧を取得するための従属関係
+  has_many(
+    :active_relationships,
+    {
+      class_name: "FollowerFollowed",
+      foreign_key: "follower_id",
+      dependent: :destroy,
+    },
+  )
+  has_many(
+    :following,
+    {
+      through: :active_relationships,
+      source: :followed,
+    }
+  )
+
+  # 自身をフォローしているユーザ(フォロワー)の一覧を取得するための従属関係
+  has_many(
+    :passive_relationships,
+    {
+      class_name: "FollowerFollowed",
+      foreign_key: "followed_id",
+      dependent: :destroy,
+    }
+  )
+  has_many(
+    :followers,
+    {
+      through: :passive_relationships,
+    }
+  )
 
   # === バリデーション
   validates(
@@ -103,9 +140,41 @@ class User < ApplicationRecord
     reset_sent_at < 2.hours.ago
   end
 
-  # 指定したユーザのマイクロポストを取得する
+  # 自分自身と、フォローしているユーザのマイクロポストを取得する
   def feed
-    Micropost.where(user_id: id)
+    # フォローしているユーザのIDを取得するための副問合せSQL
+    following_ids = "
+      select
+        followed_id
+      from
+        #{FollowerFollowed.table_name}
+      where
+        follower_id = :user_id
+    "
+
+    # 自分自身と、フォローしているユーザのマイクロポストを取得する
+    Micropost.where(
+      "user_id = :user_id OR user_id IN (#{following_ids})",
+      user_id: id,
+    )
+  end
+
+  # 対象ユーザをフォローする
+  def follow(other_user)
+    # フォローしていない場合のみフォロー処理を行う
+    unless following?(other_user)
+      following << other_user
+    end
+  end
+
+  # 対象ユーザをフォロー解除する
+  def unfollow(other_user)
+    following.delete(other_user)
+  end
+
+  # 対象ユーザがフォローしているならtrueを、していないならfalseを返す
+  def following?(other_user)
+    following.include?(other_user)
   end
 
   # ======================================
