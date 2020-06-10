@@ -1,5 +1,5 @@
 <%= form_with(
-    model: current_user.active_relationships.find_by(id: @user.id),
+    url: follower_followed_path(@user.id),
     id: "unfollow",
     html: {method: :delete},
 ) do |f| %>
