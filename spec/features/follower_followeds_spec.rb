@@ -92,12 +92,14 @@ RSpec.feature "FollowerFolloweds", type: :feature do
     scenario "フォローしていないユーザの場合はフォローできること" do
       login_operation(@follower_user)
 
-      # フォローしていないユーザのプロフィール画面に遷移する
+      # フォローしていないユーザのプロフィール画面に遷移するとフォローボタンが表示されていること
       visit user_path(@independent_user)
       expect_follow_unfollow(follow: 1, unfollow: 0)
 
       # フォローボタンを押下するとプロフィール画面に遷移し、フォロー解除ボタンに切り替わること
-      click_button("Follow")
+      expect {
+        click_button("Follow")
+      }.to change(FollowerFollowed, :count).by(1)
       expect(page).to(have_title(full_title(@independent_user.name)))
       expect_follow_unfollow(follow: 0, unfollow: 1)
 
@@ -108,12 +110,14 @@ RSpec.feature "FollowerFolloweds", type: :feature do
     scenario "すでにフォロー済みのユーザの場合はフォロー解除できること" do
       login_operation(@follower_user)
 
-      # フォロー済みのユーザのプロフィール画面に遷移する
+      # フォロー済みのユーザのプロフィール画面に遷移するとフォロー解除ボタンが表示されていること
       visit user_path(@followed_user)
       expect_follow_unfollow(follow: 0, unfollow: 1)
-
+      puts page.body
       # フォロー解除ボタンを押下するとプロフィール画面に遷移し、フォローボタンに切り替わること
-      click_button("Unfollow")
+      expect {
+        click_button("Unfollow")
+      }.to change(FollowerFollowed, :count).by(-1)
       expect(page).to(have_title(full_title(@followed_user.name)))
       expect_follow_unfollow(follow: 1, unfollow: 0)
 
