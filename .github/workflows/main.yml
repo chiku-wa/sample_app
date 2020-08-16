@@ -10,21 +10,33 @@ jobs:
   run_spec:
     name: Run spec
 
-    # ジョブを実行する仮想マシンを選択 
+    # ジョブを実行する仮想マシンを選択
     # 例：
     # macos-latest
-    # windows-latest 
+    # windows-latest
     runs-on: macos-latest
 
     steps:
     # 標準的なチェックアウトアクションを実行(https://docs.github.com/ja/actions/configuring-and-managing-workflows/configuring-a-workflow#using-the-checkout-action)
     - uses: actions/checkout@v2
 
+    # bundle install実行
+    - name: setup bundle
+      run: bundle install
+
     - name: Set up Ruby 2.5
       # 標準的なチェックアウトアクションを実行(https://docs.github.com/ja/actions/configuring-and-managing-workflows/configuring-a-workflow#using-the-checkout-action)
       uses: actions/checkout@v2
       with:
         ruby-version: 2.5.x
+
+    # マイグレーション実行
+    - name: setup migrate
+      run: |
+        rails db:create RAILS_ENV=test
+        rails db:migrate RAILS_ENV=test
+
+    # テスト実行
     - name: Test with Rspec
       run: |
         gem install bundler
