@@ -1,0 +1,32 @@
+name: Ruby
+
+# masterブランチへのPush時に実行
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  run_spec:
+    name: Run spec
+
+    # ジョブを実行する仮想マシンを選択 
+    # 例：
+    # macos-latest
+    # windows-latest 
+    runs-on: macos-latest
+
+    steps:
+    # 標準的なチェックアウトアクションを実行(https://docs.github.com/ja/actions/configuring-and-managing-workflows/configuring-a-workflow#using-the-checkout-action)
+    - uses: actions/checkout@v2
+
+    - name: Set up Ruby 2.5
+      # 標準的なチェックアウトアクションを実行(https://docs.github.com/ja/actions/configuring-and-managing-workflows/configuring-a-workflow#using-the-checkout-action)
+      uses: actions/checkout@v2
+      with:
+        ruby-version: 2.5.x
+    - name: Test with Rspec
+      run: |
+        gem install bundler
+        bundle install --path vendor/bundle --quiet --jobs 4 --retry 3
+        bundle exec rspec
